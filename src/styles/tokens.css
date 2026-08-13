@@ -1,0 +1,43 @@
+/* ============================================================
+   WAYPOINTS — design tokens
+   Dark field atlas: forest black, conifer green, ember orange.
+   Real earth, real data, modern instrument.
+   Arc/series colors validated (all-pairs CVD + contrast) on --bg.
+   ============================================================ */
+
+:root {
+  --bg: #0b0f0c;             /* forest black */
+  --bg-elevated: #121813;    /* card surface */
+  --bg-raised: #1a231c;      /* hover surface */
+  --ink-high: #e9efe6;       /* birch */
+  --ink-mid: #94a496;        /* lichen */
+  --ink-low: #35413a;        /* hairlines */
+  --green: #3f9a50;          /* conifer — primary */
+  --green-bright: #5cbb6c;   /* hover / highlights */
+  --green-deep: #17301d;     /* fills, quiet panels */
+  --orange: #e8622c;         /* ember — CTAs, markers, the pointing finger */
+  --orange-bright: #f4793f;
+
+  /* Data series (validated on #0b0f0c-#0c100d) */
+  --viz-1: #a83220;          /* rust — big game */
+  --viz-2: #e8622c;          /* ember — upland */
+  --viz-3: #3f9a50;          /* conifer — waterfowl */
+  --viz-4: #3d9fd1;          /* open water — fish */
+  --viz-neutral: #8c9088;    /* historic/extinct — always dashed */
+
+  --font-display: 'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter Variable', 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', 'SFMono-Regular', monospace;
+
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-dry: cubic-bezier(0.19, 1, 0.22, 1);
+  --t-ui: 350ms;
+  --t-draw: 1400ms;
+  --t-bleed-in: 80ms;
+  --t-bleed-out: 900ms;
+
+  --container: 1320px;
+  --gutter: clamp(20px, 4vw, 56px);
+
+  color-scheme: dark;
+}

@@ -1,0 +1,288 @@
+{
+  "events": [
+    {
+      "year": 1810,
+      "place": "Shelbyville, Kentucky",
+      "type": "nesting",
+      "lat": 38.21,
+      "lng": -85.22,
+      "note": "Alexander Wilson described a breeding place several miles wide running upwards of forty miles through the Kentucky beech woods."
+    },
+    {
+      "year": 1810,
+      "place": "Frankfort, Kentucky",
+      "type": "flight",
+      "lat": 38.2,
+      "lng": -84.87,
+      "note": "Wilson computed a single flock passing overhead toward the Indiana Territory at 2,230,272,000 birds."
+    },
+    {
+      "year": 1813,
+      "place": "Ohio River near Hardinsburg, Kentucky",
+      "type": "flight",
+      "lat": 37.78,
+      "lng": -86.46,
+      "note": "Audubon rode beneath a flight that eclipsed the noon sun; he calculated over 1.1 billion birds in three hours, and the river of pigeons ran for three days."
+    },
+    {
+      "year": 1813,
+      "place": "Green River, Kentucky",
+      "type": "roost",
+      "lat": 37.25,
+      "lng": -86.5,
+      "note": "Audubon's great Kentucky roost: more than three miles wide and forty long, dung inches deep, mature trees snapping under the birds' weight."
+    },
+    {
+      "year": 1851,
+      "place": "Plattsburgh, New York",
+      "type": "market-hunt",
+      "lat": 44.7,
+      "lng": -73.45,
+      "note": "The railroad reaches a nesting: some 1.8 million pigeons (150,000 dozen) shipped to city markets in one season, dealers paying 31-56 cents a dozen."
+    },
+    {
+      "year": 1860,
+      "place": "Fort Mississauga, Ontario",
+      "type": "flight",
+      "lat": 43.26,
+      "lng": -79.07,
+      "note": "Maj. W. Ross King watched a flight stream past for hours on end — later reckoned at more than 3.7 billion birds."
+    },
+    {
+      "year": 1866,
+      "place": "Niagara Peninsula, southern Ontario",
+      "type": "flight",
+      "lat": 43.2,
+      "lng": -79.85,
+      "note": "A column a mile wide and 300 miles long took 14 hours to pass: an estimated 3.5 billion birds, one of the last sky-darkening flights."
+    },
+    {
+      "year": 1869,
+      "place": "Hartford, Michigan",
+      "type": "market-hunt",
+      "lat": 42.21,
+      "lng": -86.17,
+      "note": "Three railcar loads a day for forty days — a reported 11,880,000 birds sent east to market from one small town."
+    },
+    {
+      "year": 1871,
+      "place": "Kilbourn City (Wisconsin Dells), Wisconsin",
+      "type": "nesting",
+      "lat": 43.63,
+      "lng": -89.77,
+      "note": "The largest nesting ever recorded: about 850 square miles of central Wisconsin sand country, an estimated 136 million breeding birds."
+    },
+    {
+      "year": 1874,
+      "place": "Shelby, Michigan (Oceana County)",
+      "type": "nesting",
+      "lat": 43.61,
+      "lng": -86.36,
+      "note": "One of the great mid-1870s Michigan nestings; professional netters shipped birds by the boxcar to Chicago and New York."
+    },
+    {
+      "year": 1878,
+      "place": "Petoskey, Michigan",
+      "type": "nesting",
+      "lat": 45.37,
+      "lng": -84.96,
+      "note": "The last great nesting: roughly 40 miles long and 3-10 wide near Little Traverse Bay; about 50,000 birds killed a day for nearly five months, over a million shipped by rail and steamer."
+    },
+    {
+      "year": 1878,
+      "place": "Sheffield, Pennsylvania",
+      "type": "nesting",
+      "lat": 41.7,
+      "lng": -79.03,
+      "note": "A Warren County colony worked over by professional netters — the last recorded visit of the pigeoners to Pennsylvania."
+    },
+    {
+      "year": 1880,
+      "place": "Kane, Pennsylvania",
+      "type": "market-hunt",
+      "lat": 41.66,
+      "lng": -78.81,
+      "note": "Hundreds of young pigeons clubbed over three days in May; after 1880, nesting in Pennsylvania was only sporadic."
+    },
+    {
+      "year": 1881,
+      "place": "Grand Traverse region, Michigan",
+      "type": "nesting",
+      "lat": 44.76,
+      "lng": -85.62,
+      "note": "A final sizable Michigan nesting in the years after Petoskey — found by the netters and raided like all the rest."
+    },
+    {
+      "year": 1882,
+      "place": "Central Wisconsin (Adams County)",
+      "type": "nesting",
+      "lat": 43.97,
+      "lng": -89.82,
+      "note": "The last nestings of large size anywhere took place in central Wisconsin this year; none of comparable scale ever formed again."
+    },
+    {
+      "year": 1887,
+      "place": "Wautoma, Wisconsin",
+      "type": "nesting",
+      "lat": 44.07,
+      "lng": -89.29,
+      "note": "The last known mass nesting attempt, northeast of Wautoma, was broken up by indiscriminate shooting; by June the birds had abandoned it."
+    },
+    {
+      "year": 1891,
+      "place": "Niagara Falls, Ontario",
+      "type": "last-record",
+      "lat": 43.09,
+      "lng": -79.08,
+      "note": "Ontario's last confirmed specimen, shot in September 1891."
+    },
+    {
+      "year": 1898,
+      "place": "near Kingston, Ontario",
+      "type": "nesting",
+      "lat": 44.26,
+      "lng": -76.55,
+      "note": "The last rookery confirmed in Ontario: about 20 birds and 12 nests — a species of billions reduced to a dozen nests."
+    },
+    {
+      "year": 1899,
+      "place": "Babcock, Wisconsin",
+      "type": "last-record",
+      "lat": 44.3,
+      "lng": -90.1,
+      "note": "Wisconsin's last fully authenticated wild passenger pigeon, shot in September 1899."
+    },
+    {
+      "year": 1900,
+      "place": "Sargents, Pike County, Ohio",
+      "type": "last-record",
+      "lat": 39.05,
+      "lng": -83.02,
+      "note": "March 24, 1900: 14-year-old Press Clay Southworth shot a female — mounted as 'Buttons' — the last fully confirmed wild passenger pigeon."
+    },
+    {
+      "year": 1902,
+      "place": "Laurel, Indiana",
+      "type": "last-record",
+      "lat": 39.5,
+      "lng": -85.19,
+      "note": "A bird reportedly shot on April 3, 1902 — among the last credible reports of a wild passenger pigeon."
+    },
+    {
+      "year": 1914,
+      "place": "Cincinnati Zoo, Ohio",
+      "type": "last-record",
+      "lat": 39.14,
+      "lng": -84.51,
+      "note": "September 1, 1914, about 1 p.m.: Martha, the last passenger pigeon on Earth, died in her cage at roughly 29 years old."
+    }
+  ],
+  "timeline": [
+    {
+      "year": 1800,
+      "event": "An estimated 3 to 5 billion passenger pigeons — perhaps one of every four birds in North America — range the eastern forests."
+    },
+    {
+      "year": 1813,
+      "event": "Audubon's Ohio River flight darkens the sky for three days; he calculates over 1.1 billion birds passing in three hours."
+    },
+    {
+      "year": 1851,
+      "event": "Railroads reach the nestings: about 1.8 million pigeons shipped to market from a single colony near Plattsburgh, New York."
+    },
+    {
+      "year": 1857,
+      "event": "An Ohio Senate committee rejects protection, declaring the pigeon so 'wonderfully prolific' that no ordinary destruction can lessen it."
+    },
+    {
+      "year": 1860,
+      "event": "Telegraph and rail industrialize the hunt: professional pigeoners, hundreds strong, now track and reach every large nesting within days."
+    },
+    {
+      "year": 1871,
+      "event": "The largest nesting ever recorded covers ~850 square miles of central Wisconsin — an estimated 136 million breeding birds."
+    },
+    {
+      "year": 1878,
+      "event": "Petoskey, Michigan: the last great nesting. Roughly 50,000 birds killed per day for nearly five months; over a million shipped."
+    },
+    {
+      "year": 1882,
+      "event": "The last large nestings form in central Wisconsin; every later attempt is broken up before the young can fledge."
+    },
+    {
+      "year": 1887,
+      "event": "The final known mass nesting attempt, near Wautoma, Wisconsin, is abandoned under gunfire."
+    },
+    {
+      "year": 1900,
+      "event": "March 24: a farm boy in Pike County, Ohio shoots the last fully confirmed wild passenger pigeon."
+    },
+    {
+      "year": 1909,
+      "event": "The American Ornithologists' Union offers a $1,500 reward for an undisturbed nesting pair. It is never claimed."
+    },
+    {
+      "year": 1914,
+      "event": "September 1: Martha, the last of her species, dies at the Cincinnati Zoo. The population is zero."
+    }
+  ],
+  "petoskey": {
+    "lat": 45.37,
+    "lng": -84.96,
+    "facts": [
+      "Discovered in March 1878 in the hardwoods near Crooked Lake and Little Traverse Bay: a nesting about 40 miles long and 3 to 10 miles wide — roughly 100,000 acres of nests, with some 150,000 acres inside its limits.",
+      "Word traveled by telegraph, and within days hundreds of professional pigeoners — estimates run from 600 netters to 2,000 or more people working the colony — had converged from across the country.",
+      "At the peak, roughly 50,000 birds were killed each day, and the pace held for nearly five months; dead birds alone left by rail at an estimated 12,500 per day.",
+      "Iced barrels went south on the Grand Rapids & Indiana Railroad and by steamer from the Petoskey docks; live birds were crated out for trap-shooting clubs.",
+      "More than a million birds were shipped in all; counting squabs left to starve, spoilage, and waste, the true kill was far higher.",
+      "H.B. Roney's small enforcement party documented the slaughter and pressed charges under Michigan's weak nesting law — token fines changed nothing, but his 1879 expose became the hunt's most damning record.",
+      "It was the species' last great nesting anywhere. Survivors that tried to re-nest that summer were followed and broken up, the immense colonies the pigeon's biology required never assembled again, and extinction followed within 36 years."
+    ]
+  },
+  "stats": [
+    {
+      "value": "3-5 billion",
+      "label": "Estimated peak population, early 1800s"
+    },
+    {
+      "value": "25-40%",
+      "label": "Share of all North American land birds at peak"
+    },
+    {
+      "value": "1.1 billion",
+      "label": "Birds Audubon calculated passing in 3 hours, 1813"
+    },
+    {
+      "value": "850 sq mi",
+      "label": "The 1871 Wisconsin nesting, largest ever recorded"
+    },
+    {
+      "value": "~50,000/day",
+      "label": "Kill rate at the 1878 Petoskey nesting"
+    },
+    {
+      "value": "36 years",
+      "label": "From last great nesting (1878) to extinction (1914)"
+    },
+    {
+      "value": "Mar 24, 1900",
+      "label": "Last fully confirmed wild bird, Pike County, Ohio"
+    },
+    {
+      "value": "0",
+      "label": "Passenger pigeons on Earth after September 1, 1914"
+    }
+  ],
+  "facts": [
+    "Flocks cruised at up to about 60 miles per hour and foraged scores of miles from a roost in a day — a nomadic species that followed the beech and oak mast crops across the eastern forest.",
+    "Each pair laid a single egg per nesting. Survival depended on colonies so vast they simply swamped every predator — a strategy that collapsed once the colonies were broken, so hunters never needed to kill the last bird, only the last great nesting.",
+    "At the big roosts, mature trees two feet thick snapped under the weight of perched birds, dung lay inches deep, and the understory died — observers compared the aftermath to the track of a tornado.",
+    "After the Civil War, telegraph and rail industrialized the hunt: several hundred to over a thousand full-time professional pigeoners followed the flocks year-round and could converge on any reported nesting within days.",
+    "Pigeons were the cheapest meat in eastern cities, often selling for around 50 cents a dozen; squabs were a restaurant delicacy, and live-trapped birds fed the trap-shooting circuit by the tens of thousands.",
+    "The clearing of the eastern beech and oak forests shrank the pigeon's food supply and nesting grounds at the very moment the market hunt peaked.",
+    "From 1909 to 1912 the American Ornithologists' Union offered a $1,500 reward for a single undisturbed nesting pair. No one ever claimed it.",
+    "Martha — named for Martha Washington — hatched in captivity and never flew wild. After her death on September 1, 1914, she was frozen in a 300-pound block of ice and shipped to the Smithsonian, where her mounted body remains.",
+    "The pigeon's disappearance stunned a public that had thought it inexhaustible, and helped drive America's first wildlife protection laws, from the Lacey Act of 1900 to the Migratory Bird Treaty Act of 1918."
+  ]
+}

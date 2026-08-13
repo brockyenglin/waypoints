@@ -1,0 +1,316 @@
+{
+  "arcs": [
+    {
+      "from": [
+        52.1,
+        -106.6
+      ],
+      "to": [
+        34.5,
+        -91.55
+      ],
+      "species": "Mallard",
+      "label": "Mallard — Mississippi Flyway (Sask. potholes → Stuttgart, AR)",
+      "kind": "waterfowl"
+    },
+    {
+      "from": [
+        59,
+        -73.5
+      ],
+      "to": [
+        38.44,
+        -76.12
+      ],
+      "species": "Canada Goose",
+      "label": "Canada Goose — Atlantic Flyway (Ungava → Chesapeake Bay)",
+      "kind": "waterfowl"
+    },
+    {
+      "from": [
+        61.3,
+        -164
+      ],
+      "to": [
+        39.4,
+        -122.1
+      ],
+      "species": "Northern Pintail",
+      "label": "Pintail — Pacific Flyway (Y-K Delta, AK → Sacramento Valley)",
+      "kind": "waterfowl"
+    },
+    {
+      "from": [
+        67.23,
+        -100.25
+      ],
+      "to": [
+        30.03,
+        -92.51
+      ],
+      "species": "Snow Goose",
+      "label": "Snow Goose — Central Flyway (Karrak Lake, NU → Gulf Coast rice)",
+      "kind": "waterfowl"
+    },
+    {
+      "from": [
+        48.1,
+        -99.1
+      ],
+      "to": [
+        20.86,
+        -90.4
+      ],
+      "species": "Blue-winged Teal",
+      "label": "Blue-winged Teal — Prairie ND → Yucatán coast",
+      "kind": "waterfowl"
+    },
+    {
+      "from": [
+        45.96,
+        -66.64
+      ],
+      "to": [
+        30.7,
+        -91.8
+      ],
+      "species": "American Woodcock",
+      "label": "Woodcock — New Brunswick → Louisiana bottomlands",
+      "kind": "upland"
+    },
+    {
+      "from": [
+        41.9,
+        -93.6
+      ],
+      "to": [
+        27.75,
+        -98.07
+      ],
+      "species": "Mourning Dove",
+      "label": "Mourning Dove — Iowa fields → South Texas brush",
+      "kind": "upland"
+    },
+    {
+      "from": [
+        41.7,
+        -108.2
+      ],
+      "to": [
+        43.28,
+        -110.44
+      ],
+      "species": "Mule Deer",
+      "label": "Mule Deer — Red Desert → Hoback (150-mile corridor)",
+      "kind": "big-game"
+    },
+    {
+      "from": [
+        43.5,
+        -110.72
+      ],
+      "to": [
+        44.4,
+        -110.6
+      ],
+      "species": "Elk",
+      "label": "Elk — National Elk Refuge → southern Yellowstone",
+      "kind": "big-game"
+    },
+    {
+      "from": [
+        43.75,
+        -110.65
+      ],
+      "to": [
+        42.4,
+        -109.8
+      ],
+      "species": "Pronghorn",
+      "label": "Pronghorn — Path of the Pronghorn (Grand Teton → Upper Green)",
+      "kind": "big-game"
+    },
+    {
+      "from": [
+        65.4,
+        -138
+      ],
+      "to": [
+        69.6,
+        -143.9
+      ],
+      "species": "Caribou",
+      "label": "Caribou — Porcupine herd (Ogilvie Mts → ANWR coastal plain)",
+      "kind": "big-game"
+    },
+    {
+      "from": [
+        46.2,
+        -124.5
+      ],
+      "to": [
+        44.9,
+        -114.8
+      ],
+      "species": "Chinook Salmon",
+      "label": "Chinook — Pacific Ocean → Middle Fork Salmon, Idaho",
+      "kind": "fish"
+    },
+    {
+      "from": [
+        64,
+        -53.5
+      ],
+      "to": [
+        46.95,
+        -65.57
+      ],
+      "species": "Atlantic Salmon",
+      "label": "Atlantic Salmon — West Greenland → Miramichi River, NB",
+      "kind": "fish"
+    },
+    {
+      "from": [
+        43.7,
+        -86.9
+      ],
+      "to": [
+        43.9,
+        -85.85
+      ],
+      "species": "Steelhead",
+      "label": "Steelhead — Lake Michigan → Pere Marquette River",
+      "kind": "fish"
+    },
+    {
+      "from": [
+        26.8,
+        -113.2
+      ],
+      "to": [
+        66,
+        -168.7
+      ],
+      "species": "Gray Whale",
+      "label": "Gray Whale — San Ignacio Lagoon → Chukchi Sea (12,000 mi round trip)",
+      "kind": "fish"
+    },
+    {
+      "from": [
+        37.8,
+        -85
+      ],
+      "to": [
+        45.37,
+        -84.95
+      ],
+      "species": "Passenger Pigeon",
+      "label": "Passenger Pigeon — Kentucky roosts → Petoskey nesting (historic)",
+      "kind": "historic"
+    },
+    {
+      "from": [
+        46.9,
+        -103.5
+      ],
+      "to": [
+        35.9,
+        -101.4
+      ],
+      "species": "Plains Bison",
+      "label": "Plains Bison — northern plains → Canadian River country (historic)",
+      "kind": "historic"
+    },
+    {
+      "from": [
+        -63,
+        -45
+      ],
+      "to": [
+        66.5,
+        -66.5
+      ],
+      "species": "Arctic Tern",
+      "label": "Arctic Tern — Weddell Sea → Baffin Island (pole to pole)",
+      "kind": "waterfowl"
+    },
+    {
+      "from": [
+        61,
+        -163.7
+      ],
+      "to": [
+        -37.2,
+        175.4
+      ],
+      "species": "Bar-tailed Godwit",
+      "label": "Bar-tailed Godwit — Alaska → New Zealand (7,000 mi nonstop)",
+      "kind": "waterfowl"
+    }
+  ],
+  "points": [
+    {
+      "lat": 42.93,
+      "lng": -109.9,
+      "label": "Trappers Point Bottleneck — Pinedale, WY",
+      "kind": "story",
+      "storyId": "muledeer"
+    },
+    {
+      "lat": 45,
+      "lng": -84.7,
+      "label": "Woodcock Singing Grounds — Northern Michigan",
+      "kind": "story",
+      "storyId": "woodcock"
+    },
+    {
+      "lat": 45.37,
+      "lng": -84.95,
+      "label": "Petoskey, MI — Last Great Passenger Pigeon Nesting, 1878",
+      "kind": "story",
+      "storyId": "pigeon"
+    },
+    {
+      "lat": 42.58,
+      "lng": -80.4,
+      "label": "Long Point Bird Observatory — banding station, Ontario",
+      "kind": "dataset"
+    },
+    {
+      "lat": 43.47,
+      "lng": -88.62,
+      "label": "Horicon Marsh NWR — waterfowl survey data, Wisconsin",
+      "kind": "dataset"
+    },
+    {
+      "lat": 39.43,
+      "lng": -120.24,
+      "label": "Sagehen Creek Field Station — Truckee, CA",
+      "kind": "dataset"
+    },
+    {
+      "lat": 44.42,
+      "lng": -111.39,
+      "label": "USGS Gauge — Henrys Fork at Island Park, ID",
+      "kind": "dataset"
+    },
+    {
+      "lat": 45.64,
+      "lng": -121.94,
+      "label": "Bonneville Dam — Columbia River fish counts",
+      "kind": "dataset"
+    },
+    {
+      "lat": 50.17,
+      "lng": -98.32,
+      "label": "Delta Marsh Research Station — Manitoba",
+      "kind": "dataset"
+    },
+    {
+      "lat": 47.74,
+      "lng": 8.97,
+      "label": "Movebank — Max Planck Institute of Animal Behavior, Radolfzell",
+      "kind": "dataset"
+    }
+  ]
+}

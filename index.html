@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waypoints — The Natural World, Made Visible</title>
+  <meta name="description" content="A living globe of the natural world — real satellite imagery, species occurrence data, tracked migrations, and habitat layers, drawn from GBIF, NASA, USGS, and a century of field records." />
+  <meta property="og:title" content="Waypoints — The Natural World, Made Visible" />
+  <meta property="og:description" content="A living globe: real satellite imagery, species data, tracked migrations, and habitat from GBIF, NASA, and USGS." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Waypoints" />
+  <meta property="og:url" content="https://brockyenglin.github.io/waypoints/" />
+  <meta property="og:image" content="https://brockyenglin.github.io/waypoints/og/default.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Waypoints — The Natural World, Made Visible" />
+  <meta name="twitter:image" content="https://brockyenglin.github.io/waypoints/og/default.jpg" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230B0F0C'/%3E%3Crect x='9.5' y='9.5' width='13' height='13' fill='none' stroke='%23E8622C' stroke-width='2.5' transform='rotate(45 16 16)'/%3E%3Crect x='13.5' y='13.5' width='5' height='5' fill='%23E8622C' transform='rotate(45 16 16)'/%3E%3C/svg%3E" />
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ============ NAV ============ -->
+  <nav class="masthead" aria-label="Primary">
+    <a class="wordmark display" href="#top">Waypoints<span class="wp filled" aria-hidden="true"></span></a>
+    <div class="masthead-links">
+      <a class="rom-link" href="#coverage">Coverage</a>
+      <a class="rom-link" href="#sources">Sources</a>
+      <a class="rom-link" href="#partner">Partner</a>
+    </div>
+    <div class="masthead-right">
+      <span class="mono live-badge"><i aria-hidden="true"></i>GBIF + NASA · DATA AUG 2026</span>
+    </div>
+  </nav>
+
+  <main id="top">
+    <!-- ============ THE GLOBE ============ -->
+    <header class="atlas" id="atlas">
+      <div class="globe-stage" id="globe-stage" role="img" aria-label="Interactive globe of Earth built from NASA satellite imagery, with tracked migration routes, species-occurrence and vegetation layers, and three field studies that fly the camera to their region. Drag to rotate.">
+      </div>
+      <div class="globe-tip map-tip" id="globe-tip" role="status"></div>
+
+      <div class="atlas-intro" data-reveal>
+        <h1 class="display">The natural world, made visible.</h1>
+        <p>Real wildlife and habitat data on a living globe.<br />Drag it. Layer it. Follow the animals.</p>
+      </div>
+
+      <nav class="story-index" aria-label="Field studies" data-reveal>
+        <p class="mono index-label">FIELD STUDIES</p>
+        <button class="index-item" data-story="muledeer">
+          <span class="mono index-no">01</span>
+          <span class="index-name">Mule deer<em>150 miles, twice a year</em></span>
+        </button>
+        <button class="index-item" data-story="woodcock">
+          <span class="mono index-no">02</span>
+          <span class="index-name">Woodcock<em>Gone by morning</em></span>
+        </button>
+        <button class="index-item" data-story="pigeon">
+          <span class="mono index-no">03</span>
+          <span class="index-name">Passenger pigeon<em>From billions to zero</em></span>
+        </button>
+      </nav>
+
+      <div class="layer-bar" data-reveal>
+        <div class="layer-chips" id="layer-chips" role="group" aria-label="Globe data layers"></div>
+        <div class="caption-row">
+          <p class="mono layer-caption" id="layer-caption">Tracked migrations on record — three woodcock GPS tracks + the Red Desert–Hoback mule deer corridor · drag to rotate · ⌘+scroll / dbl-click to zoom</p>
+          <button class="mono share-btn" id="share-btn" title="Copy a link to this view">⧉ SHARE</button>
+        </div>
+        <div class="density-legend mono" id="density-legend" hidden aria-label="Density scale">
+          <span>FEWER RECORDS</span>
+          <i class="legend-ramp" aria-hidden="true"></i>
+          <span>MORE RECORDS</span>
+          <span class="legend-note">RELATIVE POINT DENSITY · GBIF</span>
+        </div>
+      </div>
+
+      <div class="compare-divider" id="compare-divider" hidden>
+        <div class="divider-line" aria-hidden="true"></div>
+        <button class="divider-handle mono" aria-label="Drag to compare">⇄</button>
+        <span class="mono cmp-label cmp-label-a" id="cmp-label-a"></span>
+        <span class="mono cmp-label cmp-label-b" id="cmp-label-b"></span>
+        <button class="panel-close mono cmp-exit" id="cmp-exit" aria-label="Exit compare">✕ COMPARE</button>
+      </div>
+
+      <div class="story-hud" id="story-hud" hidden>
+        <div class="hud-head">
+          <div>
+            <p class="kicker" id="hud-kicker"></p>
+            <p class="hud-title display" id="hud-title"></p>
+          </div>
+          <button class="panel-close mono" id="story-close" aria-label="Close story">✕</button>
+        </div>
+        <div class="pigeon-timeline" id="hud-timeline" hidden>
+          <div class="timeline-readout mono"><span id="pigeon-year">1810</span><span id="pigeon-caption">recorded events light up as the century runs</span></div>
+          <input type="range" id="pigeon-scrub" min="1810" max="1914" value="1810" step="1" aria-label="Timeline year, 1810 to 1914" />
+        </div>
+        <a class="mono hud-read" href="#reader">READ THE FIELD NOTES <span aria-hidden="true">↓</span></a>
+      </div>
+
+      <div class="map-controls" aria-label="Map zoom controls">
+        <button class="ctl" id="zoom-in" aria-label="Zoom in">+</button>
+        <button class="ctl" id="zoom-out" aria-label="Zoom out">−</button>
+        <button class="ctl ctl-home" id="zoom-home" aria-label="Reset view" title="Reset view">⌂</button>
+      </div>
+
+      <aside class="catalog" id="catalog" hidden aria-label="Visualization catalog">
+        <div class="catalog-head">
+          <p class="kicker">Atlas catalog</p>
+          <button class="panel-close mono" id="catalog-close" aria-label="Close catalog">✕</button>
+        </div>
+        <input class="catalog-search mono" id="catalog-search" type="search" placeholder="SEARCH LAYERS + STUDIES…" aria-label="Search visualizations" />
+        <div class="catalog-list" id="catalog-list" data-lenis-prevent></div>
+        <p class="mono catalog-foot">EVERY LAYER TRACES TO ITS SOURCE · REFETCHED FROM GBIF + NASA ON EACH BUILD</p>
+      </aside>
+
+<!-- story content lives in the reader below the map -->
+    </header>
+
+    <!-- ============ FIELD NOTES READER (map above, story below) ============ -->
+    <section class="reader" id="reader" hidden aria-live="polite">
+      <div class="container">
+        <article class="reader-body" id="reader-muledeer" hidden>
+          <p class="kicker">N°01 — Mule deer · Field notes</p>
+          <h2 class="display">150 miles, twice a year.</h2>
+          <p class="reader-deck">Wyoming's Red Desert-to-Hoback herd rides the spring greenup from desert floor to high country — through a gap that cost $2.1 million to keep open.</p>
+          <div class="reader-cols">
+            <p>Every spring, thousands of mule deer leave Wyoming's Red Desert and travel 150 miles north to the high country. They don't hurry. They surf the green wave, timing their climb so they arrive at each elevation just as new growth peaks. The whole migration funnels through a handful of bottlenecks — some only a few hundred meters wide — and collar data is what revealed them: the longest mule deer migration ever recorded hid in plain sight until 2013.</p>
+            <p>One bottleneck sat so close to development that keeping it open cost $2.1 million. Corridors like this now decide the future of Western mule deer, and the maps are how they get protected. The diamonds on the map above are the pinch points — hover them.</p>
+          </div>
+          <div class="reader-stats">
+            <div class="stat"><span class="stat-value">150 mi</span><span class="stat-label">One-way corridor length</span></div>
+            <div class="stat"><span class="stat-value">$2.1M</span><span class="stat-label">To protect one 364-acre bottleneck</span></div>
+            <div class="stat"><span class="stat-value">4–5,000</span><span class="stat-label">Deer through each spring and fall</span></div>
+            <div class="stat"><span class="stat-value">242 mi</span><span class="stat-label">Longest single journey on record</span></div>
+          </div>
+          <p class="mono source-line">DATA: WYOMING MIGRATION INITIATIVE / USGS</p>
+        </article>
+
+        <article class="reader-body" id="reader-woodcock" hidden>
+          <p class="kicker">N°02 — American woodcock · Field notes</p>
+          <h2 class="display">Gone by morning.</h2>
+          <p class="reader-deck">Woodcock migrate alone, at night, barely above the treetops. The three birds crossing the map are flying real GPS-style tracks.</p>
+          <div class="reader-cols">
+            <p>Woodcock don't migrate in flocks. Each bird lifts off at dusk, alone, flies a few dark hours low over the trees, and drops into thick young forest before dawn. For most of history that made the migration invisible: the birds were here, then they weren't.</p>
+            <p>Since 2017, researchers have fitted hundreds of woodcock with GPS transmitters lighter than a nickel, and the route finally has a shape — hops of 20 to 150 miles, long stopovers in river-bottom cover, a chain of habitat running from Canada to the Gulf. Lose a link and the chain breaks. Hover any stopover on the map to see the date and the cover the bird chose.</p>
+          </div>
+          <div class="reader-stats">
+            <div class="stat"><span class="stat-value">737</span><span class="stat-label">Transmitters deployed, 2017–2024</span></div>
+            <div class="stat"><span class="stat-value">4.5 g</span><span class="stat-label">One transmitter — lighter than a nickel</span></div>
+            <div class="stat"><span class="stat-value">20–150 mi</span><span class="stat-label">A single night's hop</span></div>
+            <div class="stat"><span class="stat-value">50–300 m</span><span class="stat-label">Flight altitude above the trees</span></div>
+          </div>
+          <p class="mono source-line">DATA: EASTERN WOODCOCK MIGRATION RESEARCH COOPERATIVE / USGS</p>
+        </article>
+
+        <article class="reader-body" id="reader-pigeon" hidden>
+          <p class="kicker">N°03 — Passenger pigeon · Field notes</p>
+          <h2 class="display">From billions to zero.</h2>
+          <p class="reader-deck">The most abundant bird in North America went extinct in 36 years. Run the century on the map's timeline and watch it happen.</p>
+          <div class="reader-cols">
+            <p>In the early 1800s, passenger pigeons may have outnumbered every other bird in North America combined — flights that darkened the sky for three days, nestings that covered 850 square miles. Then the telegraph and the railroad found the colonies. The last great nesting, in 1878, was emptied by rail at roughly 50,000 birds a day.</p>
+            <p>By September 1914 the species was a single elderly female in a Cincinnati zoo cage — and then it was zero. There is no GPS track for a passenger pigeon. The points on the map are drawn from ledgers, newspapers, and testimony: the only flight path the species has left.</p>
+          </div>
+          <div class="reader-stats">
+            <div class="stat"><span class="stat-value">3–5 B</span><span class="stat-label">Estimated peak population</span></div>
+            <div class="stat"><span class="stat-value">~50,000/day</span><span class="stat-label">Kill rate at the last great nesting</span></div>
+            <div class="stat"><span class="stat-value">36 yrs</span><span class="stat-label">From last great nesting to extinction</span></div>
+            <div class="stat"><span class="stat-value">0</span><span class="stat-label">After September 1, 1914</span></div>
+          </div>
+          <p class="mono source-line">DATA: HISTORICAL ACCOUNTS &amp; MARKET RECORDS, 1810–1914</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ WHY ============ -->
+    <section class="manifesto" id="manifesto" aria-labelledby="manifesto-title">
+      <div class="container">
+        <p class="kicker" id="manifesto-title" data-reveal>Why this exists</p>
+        <div class="manifesto-lines" data-reveal-group>
+          <p class="display" data-reveal>Every dot on this globe was a living animal.</p>
+          <p class="display" data-reveal>The natural world runs on movement — and almost nobody gets to see it.</p>
+          <p class="display" data-reveal>The data is public. It deserves better than a spreadsheet.</p>
+          <p class="display accent" data-reveal>Maps you can actually use — in the field, in a meeting, in a classroom.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">
+      <div class="lines"><i></i><i></i><i></i></div>
+      <span class="label">BRG 325° T — RED DESERT → HOBACK BASIN / 136 MI GC</span>
+      <div class="lines"><i></i><i></i><i></i></div>
+    </div>
+
+    <!-- ============ COVERAGE ============ -->
+    <section class="pillars" id="coverage" aria-labelledby="pillars-title">
+      <div class="container">
+        <p class="kicker" data-reveal>Coverage</p>
+        <h2 class="display section-title" id="pillars-title" data-reveal>Five ways to read the same country.</h2>
+        <p class="section-intro" data-reveal>Everything filed under five headings. Same woods, same water — different questions.</p>
+        <div class="pillar-grid" data-reveal-group>
+          <div class="plate pillar" data-reveal>
+            <p class="plate-marginalia">01</p>
+            <h3>Migration &amp; Movement</h3>
+            <p>Where animals go and when they decide to move. A teal that leaves Manitoba in September is a story with a route, a timeline, and a destination — the maps draw the whole thing.</p>
+          </div>
+          <div class="plate pillar" data-reveal>
+            <p class="plate-marginalia">02</p>
+            <h3>Range &amp; Distribution</h3>
+            <p>Where a species holds, where it's thinning, and where the old maps have quietly stopped being true. Range edges are real lines, and they move.</p>
+          </div>
+          <div class="plate pillar" data-reveal>
+            <p class="plate-marginalia">03</p>
+            <h3>Habitat &amp; Conditions</h3>
+            <p>Trout don't read calendars; they read water temperature. Stream gauges, snowpack, forest age, canopy density — the conditions that decide whether animals are there at all.</p>
+          </div>
+          <div class="plate pillar" data-reveal>
+            <p class="plate-marginalia">04</p>
+            <h3>Historical &amp; Archival</h3>
+            <p>Century-old banding cards, market ledgers, township records. What the documents say was here, drawn where it happened.</p>
+          </div>
+          <div class="plate pillar" data-reveal>
+            <p class="plate-marginalia">05</p>
+            <h3>Hyperlocal</h3>
+            <p>Single watersheds, single forests, single seasons — the scale where a map stops being interesting and starts being useful.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">
+      <div class="lines"><i></i><i></i><i></i></div>
+      <span class="label">45.64° N, 121.94° W — BONNEVILLE DAM FISH COUNTS</span>
+      <div class="lines"><i></i><i></i><i></i></div>
+    </div>
+
+    <!-- ============ SOURCES ============ -->
+    <section class="sources" id="sources" aria-labelledby="sources-title">
+      <div class="container">
+        <p class="kicker" data-reveal>Sources</p>
+        <h2 class="display section-title" id="sources-title" data-reveal>Where the numbers come from.</h2>
+        <p class="section-intro" data-reveal>Every layer on this site is drawn from public, citable data — the same sources researchers use. If a number is on the globe, you can trace it back to the agency that measured it.</p>
+        <dl class="source-ledger" data-reveal-group>
+          <div class="source" data-reveal><dt>GBIF</dt><dd>Three billion occurrence records, queryable live — the black bear layer is drawn straight from its API.</dd></div>
+          <div class="source" data-reveal><dt>NASA Earth Observations</dt><dd>The globe itself: Blue Marble surface, Black Marble night lights, and monthly MODIS vegetation.</dd></div>
+          <div class="source" data-reveal><dt>Movebank</dt><dd>Animal tracking data from research teams worldwide — the raw material of every movement map.</dd></div>
+          <div class="source" data-reveal><dt>Eastern Woodcock Migration Research Cooperative</dt><dd>Satellite-tagged woodcock from New Brunswick to the Gulf, tracked through the full annual cycle since 2017.</dd></div>
+          <div class="source" data-reveal><dt>USGS Bird Banding Laboratory</dt><dd>Band recoveries going back a century — origin-to-destination pairs, one row at a time.</dd></div>
+          <div class="source" data-reveal><dt>USGS National Water Information System</dt><dd>Stream gauges logging temperature and flow every 15 minutes, decade after decade.</dd></div>
+          <div class="source" data-reveal><dt>eBird / Cornell Lab of Ornithology</dt><dd>Hundreds of millions of checklists — the backbone of modern range and abundance maps.</dd></div>
+          <div class="source" data-reveal><dt>State fish &amp; wildlife agencies</dt><dd>Harvest surveys by county, species, and season, across the Great Lakes states and beyond.</dd></div>
+          <div class="source" data-reveal><dt>Schorger passenger pigeon database</dt><dd>622 georeferenced records of the passenger pigeon's decline, compiled from historical accounts.</dd></div>
+          <div class="source" data-reveal><dt>Western Migrations / Wyoming Game &amp; Fish</dt><dd>Corridor data from the researchers who proved a migration map could move policy.</dd></div>
+        </dl>
+
+        <div class="attribution" data-reveal>
+          <p class="kicker">Attribution &amp; licensing</p>
+          <ul class="mono attribution-list">
+            <li>Species occurrence density © the contributing datasets, aggregated and served by <a class="rom-link" href="https://www.gbif.org" rel="noopener">GBIF — the Global Biodiversity Information Facility</a>, via the GBIF occurrence maps API. Individual datasets carry their own licenses (CC0, CC&nbsp;BY, and CC&nbsp;BY-NC); this site is non-commercial and displays aggregated density only.</li>
+            <li>Earth imagery: NASA Blue Marble Next Generation and Black Marble (NASA Earth Observatory / Visible Earth), and monthly datasets via <a class="rom-link" href="https://neo.gsfc.nasa.gov" rel="noopener">NASA Earth Observations</a>. NASA imagery is in the public domain; use does not imply NASA endorsement.</li>
+            <li>Mule deer corridor: published research of the Wyoming Migration Initiative / USGS. Woodcock tracks: modeled on Eastern Woodcock Migration Research Cooperative telemetry. Passenger pigeon events: historical accounts and market records, after A.&nbsp;W.&nbsp;Schorger.</li>
+            <li>Basemap boundaries: Natural Earth (public domain). Rendering: three.js (MIT).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">
+      <div class="lines"><i></i><i></i><i></i></div>
+      <span class="label">50.17° N, 98.32° W — DELTA MARSH STATION, MAN.</span>
+      <div class="lines"><i></i><i></i><i></i></div>
+    </div>
+
+    <!-- ============ PARTNER ============ -->
+    <section class="partner" id="partner" aria-labelledby="partner-title">
+      <div class="container partner-inner plate">
+        <p class="plate-marginalia">PARTNERSHIPS</p>
+        <h2 class="display section-title" id="partner-title" data-reveal>Bring your data.</h2>
+        <p class="section-intro" data-reveal>Agencies, conservation organizations, and research groups sit on remarkable datasets — telemetry, surveys, decades of monitoring — that rarely get seen outside a report. Waypoints turns that data into living, accurate, verifiable visualizations: real coordinates, live APIs, satellite imagery, nothing invented. If it should be seen by more people than the ones who collected it, we should talk.</p>
+        <ul class="audience-list" data-reveal-group>
+          <li data-reveal><span class="wp green" aria-hidden="true"></span>State fish &amp; wildlife agencies</li>
+          <li data-reveal><span class="wp green" aria-hidden="true"></span>Conservation organizations and their chapters</li>
+          <li data-reveal><span class="wp green" aria-hidden="true"></span>Research cooperatives and university labs</li>
+        </ul>
+        <div class="partner-cta" data-reveal>
+          <a class="btn btn-primary" href="mailto:byenglin@gmail.com?subject=Waypoints%20partnership">Start a conversation</a>
+          <p class="mono">YOUR DATA STAYS YOURS. CREDITED ON EVERY MAP.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="colophon">
+    <div class="container colophon-grid">
+      <div>
+        <p class="wordmark display">Waypoints<span class="wp filled" aria-hidden="true"></span></p>
+        <p class="colophon-line">Built on public data — GBIF, NASA, USGS, and the people who count things.</p>
+      </div>
+      <div class="mono colophon-meta">
+        <p>GLOBE: NASA BLUE MARBLE · BLACK MARBLE · MODIS NDVI</p>
+        <p>LIVE LAYERS: GBIF OCCURRENCE API</p>
+        <p>PROJECTIONS: WGS84</p>
+      </div>
+      <div class="mono colophon-meta">
+        <p>TYPE: SPACE GROTESK · INTER · JETBRAINS MONO</p>
+        <p>AN INDEPENDENT PROJECT · © <span id="year"></span> WAYPOINTS</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Chapter rail -->
+  <nav class="rail" aria-label="Section index">
+    <a href="#atlas" data-rail="atlas"><span class="wp" aria-hidden="true"></span><span class="rail-label">ATLAS</span></a>
+    <a href="#coverage" data-rail="coverage"><span class="wp" aria-hidden="true"></span><span class="rail-label">COVERAGE</span></a>
+    <a href="#sources" data-rail="sources"><span class="wp" aria-hidden="true"></span><span class="rail-label">SOURCES</span></a>
+    <a href="#partner" data-rail="partner"><span class="wp" aria-hidden="true"></span><span class="rail-label">PARTNER</span></a>
+  </nav>
+</body>
+</html>

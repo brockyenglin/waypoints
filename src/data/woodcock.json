@@ -1,0 +1,288 @@
+{
+  "tracks": [
+    {
+      "id": "atlantic-miramichi",
+      "name": "Miramichi",
+      "flyway": "Atlantic",
+      "points": [
+        {
+          "lat": 46.93,
+          "lng": -65.63,
+          "date": "2025-10-13",
+          "place": "Miramichi River valley alder bottoms, New Brunswick (capture site)"
+        },
+        {
+          "lat": 45.66,
+          "lng": -67.86,
+          "date": "2025-10-18",
+          "place": "Baskahegan Stream young forest, Danforth, Maine"
+        },
+        {
+          "lat": 44.94,
+          "lng": -68.67,
+          "date": "2025-10-22",
+          "place": "Penobscot River bottoms, Old Town, Maine"
+        },
+        {
+          "lat": 43.44,
+          "lng": -70.75,
+          "date": "2025-10-28",
+          "place": "Mousam River aspen-alder cover, Sanford, Maine"
+        },
+        {
+          "lat": 42.68,
+          "lng": -70.86,
+          "date": "2025-11-02",
+          "place": "Coastal shrubland near Ipswich, Massachusetts"
+        },
+        {
+          "lat": 41.47,
+          "lng": -71.58,
+          "date": "2025-11-07",
+          "place": "Great Swamp Management Area, West Kingston, Rhode Island"
+        },
+        {
+          "lat": 38.98,
+          "lng": -74.92,
+          "date": "2025-11-13",
+          "place": "Cape May peninsula thickets, New Jersey — staged 6 nights waiting on a north wind"
+        },
+        {
+          "lat": 38.85,
+          "lng": -75.28,
+          "date": "2025-11-19",
+          "place": "Prime Hook scrub near Milton, Delaware, after the Delaware Bay crossing"
+        },
+        {
+          "lat": 37.4,
+          "lng": -75.9,
+          "date": "2025-11-24",
+          "place": "Eastern Shore loblolly edge, Machipongo, Virginia"
+        },
+        {
+          "lat": 35.86,
+          "lng": -77.08,
+          "date": "2025-12-01",
+          "place": "Roanoke River bottomland hardwoods, Williamston, North Carolina"
+        },
+        {
+          "lat": 34.64,
+          "lng": -78.6,
+          "date": "2025-12-06",
+          "place": "Cape Fear River bottoms, Elizabethtown, North Carolina"
+        },
+        {
+          "lat": 33.16,
+          "lng": -79.72,
+          "date": "2025-12-11",
+          "place": "Francis Marion National Forest, South Carolina"
+        },
+        {
+          "lat": 32.77,
+          "lng": -81.61,
+          "date": "2025-12-19",
+          "place": "Savannah River bottomlands near Sylvania, Georgia (winter range)"
+        }
+      ]
+    },
+    {
+      "id": "central-namekagon",
+      "name": "Namekagon",
+      "flyway": "Central/Mississippi",
+      "points": [
+        {
+          "lat": 46.24,
+          "lng": -89.2,
+          "date": "2025-10-14",
+          "place": "Ottawa National Forest aspen cuts, Watersmeet, Upper Michigan (capture site)"
+        },
+        {
+          "lat": 45.93,
+          "lng": -90.45,
+          "date": "2025-10-17",
+          "place": "Chequamegon National Forest near Park Falls, Wisconsin"
+        },
+        {
+          "lat": 44.07,
+          "lng": -90.17,
+          "date": "2025-10-23",
+          "place": "Necedah National Wildlife Refuge, Wisconsin"
+        },
+        {
+          "lat": 43.16,
+          "lng": -90.09,
+          "date": "2025-10-27",
+          "place": "Lower Wisconsin Riverway floodplain, Spring Green, Wisconsin"
+        },
+        {
+          "lat": 42.09,
+          "lng": -90.14,
+          "date": "2025-11-01",
+          "place": "Upper Mississippi River bottoms near Savanna, Illinois"
+        },
+        {
+          "lat": 40.39,
+          "lng": -90.06,
+          "date": "2025-11-06",
+          "place": "Illinois River bottoms at Chautauqua NWR, Havana, Illinois"
+        },
+        {
+          "lat": 37.27,
+          "lng": -89.13,
+          "date": "2025-11-14",
+          "place": "Cache River wetlands, Ullin, Illinois — a 215-mile night, the longest of the route"
+        },
+        {
+          "lat": 36.97,
+          "lng": -90.15,
+          "date": "2025-11-18",
+          "place": "Mingo National Wildlife Refuge, Puxico, Missouri"
+        },
+        {
+          "lat": 35.53,
+          "lng": -90.42,
+          "date": "2025-11-24",
+          "place": "St. Francis River bottoms, Marked Tree, Arkansas"
+        },
+        {
+          "lat": 34.36,
+          "lng": -91.12,
+          "date": "2025-12-02",
+          "place": "White River bottomland hardwoods, St. Charles, Arkansas"
+        },
+        {
+          "lat": 33.06,
+          "lng": -92.13,
+          "date": "2025-12-09",
+          "place": "Felsenthal National Wildlife Refuge, Arkansas"
+        },
+        {
+          "lat": 31.34,
+          "lng": -92.52,
+          "date": "2025-12-16",
+          "place": "Kisatchie piney woods near Alexandria, Louisiana (winter stronghold)"
+        }
+      ]
+    },
+    {
+      "id": "michigan-petoskey",
+      "name": "Petoskey",
+      "flyway": "Central/Mississippi",
+      "points": [
+        {
+          "lat": 45.31,
+          "lng": -84.91,
+          "date": "2025-10-16",
+          "place": "Young aspen stand near Petoskey, Emmet County, Michigan (capture site) — lingered 10 days after tagging"
+        },
+        {
+          "lat": 44.4,
+          "lng": -85.71,
+          "date": "2025-10-26",
+          "place": "Manistee River bottoms near Mesick, Michigan"
+        },
+        {
+          "lat": 43.42,
+          "lng": -85.8,
+          "date": "2025-10-30",
+          "place": "Muskegon River floodplain, Newaygo, Michigan"
+        },
+        {
+          "lat": 42.53,
+          "lng": -85.93,
+          "date": "2025-11-03",
+          "place": "Allegan State Game Area, Michigan"
+        },
+        {
+          "lat": 41.19,
+          "lng": -86.72,
+          "date": "2025-11-08",
+          "place": "Kankakee River bottoms near North Judson, Indiana"
+        },
+        {
+          "lat": 39.88,
+          "lng": -87.2,
+          "date": "2025-11-13",
+          "place": "Sugar Creek ravine forest near Marshall, Indiana"
+        },
+        {
+          "lat": 38.65,
+          "lng": -87.51,
+          "date": "2025-11-17",
+          "place": "Wabash River bottoms near Vincennes, Indiana"
+        },
+        {
+          "lat": 36.87,
+          "lng": -88.33,
+          "date": "2025-11-23",
+          "place": "Clarks River National Wildlife Refuge, Benton, Kentucky"
+        },
+        {
+          "lat": 35.56,
+          "lng": -89.22,
+          "date": "2025-11-30",
+          "place": "Hatchie River bottomlands, Brownsville, Tennessee"
+        },
+        {
+          "lat": 34.63,
+          "lng": -89.2,
+          "date": "2025-12-05",
+          "place": "Holly Springs National Forest, Mississippi"
+        },
+        {
+          "lat": 32.94,
+          "lng": -90.79,
+          "date": "2025-12-12",
+          "place": "Delta National Forest, Rolling Fork, Mississippi"
+        },
+        {
+          "lat": 32.02,
+          "lng": -91.44,
+          "date": "2025-12-17",
+          "place": "Tensas River National Wildlife Refuge, Louisiana"
+        },
+        {
+          "lat": 31.14,
+          "lng": -93.22,
+          "date": "2025-12-23",
+          "place": "Vernon Parish piney woods near Leesville, Louisiana (winter range)"
+        }
+      ]
+    }
+  ],
+  "stats": [
+    {
+      "value": "737",
+      "label": "GPS transmitters deployed by the EWMRC, autumn 2017 to spring 2024"
+    },
+    {
+      "value": "4.5 g",
+      "label": "Weight of a rump-mounted Lotek PinPoint GPS-Argos tag — lighter than a nickel"
+    },
+    {
+      "value": "20–150 mi",
+      "label": "Typical single-night migration hop between stopovers"
+    },
+    {
+      "value": "50–300 m",
+      "label": "Flight altitude during migration — barely above the treetops"
+    },
+    {
+      "value": "~30 days",
+      "label": "Typical length of a fall migration, most of it spent resting in cover"
+    },
+    {
+      "value": "15 + 3",
+      "label": "US states and Canadian provinces where EWMRC birds have been tagged"
+    }
+  ],
+  "facts": [
+    "Woodcock migrate alone, at night. Each bird lifts off around dusk, flies a few hours through the dark, and drops into thick cover before dawn — there are no flocks, no V formations, no daytime movements.",
+    "They fly absurdly low for a migrant: roughly 50 to 300 meters up, skimming the treetops where songbirds pass thousands of feet overhead. The woodcock also holds the record for the slowest flight speed ever measured in a bird, about 5 mph during its courtship display.",
+    "Migration is a chain of habitat, not a single flight: hops of 20 to 150 miles separated by multi-day stopovers in young forest, aspen cuts, alder runs, and river-bottom thickets. Lose the stopover cover and the chain breaks.",
+    "GPS-tagged birds show real stopover fidelity — some return to the same few acres of covert or the same wintering field in consecutive years, navigating back to a patch of mud they last probed twelve months earlier.",
+    "The Eastern Woodcock Migration Research Cooperative, coordinated by the University of Maine since 2017, has fitted 737 woodcock with 4.5-gram rump-mounted GPS-Argos transmitters across 15 states and 3 Canadian provinces, producing the first full-annual-cycle picture of the species' movements.",
+    "The bird collects nicknames the way it collects earthworms: timberdoodle, bogsucker, night partridge, Labrador twister. Its eyes sit high and far back on its skull so it can watch the sky for hawks while its bill is buried in the mud — an arrangement so extreme its brain is effectively upside-down.",
+    "The flyways sort themselves in fall: Atlantic birds funnel down the coastal lowlands — stacking up at bay crossings like Cape May to wait for a north wind — and winter in the Carolinas and Georgia, while Great Lakes birds ride the Mississippi's river bottoms south to the piney woods of Louisiana and east Texas, the species' wintering stronghold."
+  ]
+}

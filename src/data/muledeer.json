@@ -1,0 +1,166 @@
+{
+  "corridor": [
+    [
+      41.66,
+      -108.92
+    ],
+    [
+      41.74,
+      -108.97
+    ],
+    [
+      41.83,
+      -109.03
+    ],
+    [
+      41.92,
+      -109.1
+    ],
+    [
+      42.01,
+      -109.19
+    ],
+    [
+      42.1,
+      -109.3
+    ],
+    [
+      42.2,
+      -109.38
+    ],
+    [
+      42.31,
+      -109.44
+    ],
+    [
+      42.42,
+      -109.52
+    ],
+    [
+      42.53,
+      -109.6
+    ],
+    [
+      42.63,
+      -109.66
+    ],
+    [
+      42.72,
+      -109.71
+    ],
+    [
+      42.79,
+      -109.75
+    ],
+    [
+      42.85,
+      -109.79
+    ],
+    [
+      42.92,
+      -109.79
+    ],
+    [
+      42.92,
+      -109.91
+    ],
+    [
+      42.89,
+      -110.01
+    ],
+    [
+      42.95,
+      -110.06
+    ],
+    [
+      43.02,
+      -110.11
+    ],
+    [
+      43.08,
+      -110.19
+    ],
+    [
+      43.13,
+      -110.28
+    ],
+    [
+      43.17,
+      -110.34
+    ],
+    [
+      43.22,
+      -110.41
+    ],
+    [
+      43.27,
+      -110.46
+    ]
+  ],
+  "bottlenecks": [
+    {
+      "name": "Fremont Lake outlet (Luke Lynch WHMA)",
+      "lat": 42.92,
+      "lng": -109.79,
+      "note": "The corridor's tightest pinch: 4,000-5,000 deer squeeze through a ~400-meter gap between Fremont Lake and the edge of Pinedale. The 364-acre parcel here was nearly developed; a $2.1M conservation deal in 2016 kept it open."
+    },
+    {
+      "name": "Trappers Point",
+      "lat": 42.89,
+      "lng": -110.01,
+      "note": "An hourglass of high ground between the Green and New Fork rivers, about 6 miles west of Pinedale, used by migrating ungulates for at least 6,000 years. US 191 bisects it; WYDOT's overpasses and underpasses (completed 2012) now carry thousands of deer and pronghorn over the highway."
+    },
+    {
+      "name": "Highway 28 crossing",
+      "lat": 42.15,
+      "lng": -109.35,
+      "note": "On the southern stretch near Farson, deer must cross WY-28 moving between the Red Desert winter range and the Wind River front — a chronic vehicle-collision zone on the route's desert leg."
+    },
+    {
+      "name": "The Rim",
+      "lat": 43.17,
+      "lng": -110.34,
+      "note": "The divide between the upper Green River and the Hoback Basin, where the corridor funnels over a forested pass and across US 189/191 — the last gate before summer range."
+    }
+  ],
+  "ranges": {
+    "winter": {
+      "name": "Red Desert winter range (near Superior / Steamboat Mountain)",
+      "lat": 41.7,
+      "lng": -108.95
+    },
+    "summer": {
+      "name": "Hoback Basin summer range (south of Jackson)",
+      "lat": 43.26,
+      "lng": -110.45
+    }
+  },
+  "stats": [
+    {
+      "value": "~150 mi",
+      "label": "One-way corridor length — the longest mule deer migration ever recorded when documented"
+    },
+    {
+      "value": "$2.1M",
+      "label": "Raised to buy and restore the 364-acre Fremont Lake bottleneck, now the Luke Lynch WHMA (2016)"
+    },
+    {
+      "value": "4,000-5,000",
+      "label": "Mule deer that funnel through the corridor's bottlenecks each spring and fall"
+    },
+    {
+      "value": "242 mi",
+      "label": "Deer 255's record one-way journey, Red Desert to Island Park, Idaho"
+    }
+  ],
+  "facts": [
+    "The corridor came to light in 2013, when GPS-collar data from research biologist Hall Sawyer revealed that deer wintering in the Red Desert north of Rock Springs were traveling roughly 150 miles to summer in the Hoback Basin — the longest mule deer migration ever documented, formalized in the 2014 Red Desert to Hoback Migration Assessment (Wyoming Migration Initiative / USGS).",
+    "Deer 255, a doe collared near Superior in the Red Desert, blew past the Hoback and kept going — 242 miles one way to Island Park, Idaho, the longest migration of any mule deer known to science. Researchers tracked her across some 3,300 miles before she died on her Red Desert winter range in 2024, at 10 years and 10 months old.",
+    "The deer 'surf the green wave': University of Wyoming research shows they pace their northward movement to track the spring green-up, arriving at each stretch of habitat just as plants hit peak digestibility — the migration itself is a feeding strategy, not a commute.",
+    "Migration is mostly waiting, not walking: collared deer spend up to 95% of their migration time at stopover sites, refueling on new growth. Protecting stopovers matters as much as protecting the line on the map.",
+    "The whole 150-mile route once hinged on 364 acres at the Fremont Lake outlet, where 4,000-5,000 deer squeeze through a ~400-meter gap between the lake and Pinedale. In 2016 The Conservation Fund bought the parcel for $1.7M, put roughly $400K more into restoring it (~$2.1M total), and donated it to the Wyoming Game and Fish Commission.",
+    "That property became the Luke Lynch Wildlife Habitat Management Area, named for The Conservation Fund's Wyoming state director, who championed the deal before his death in a 2015 ski-mountaineering accident on Mount Moran.",
+    "At Trappers Point, archaeological bone beds show ungulates have funneled through the hourglass between the Green and New Fork rivers for at least 6,000 years. After WYDOT built two overpasses and six underpasses on US 191 in 2012, deer-vehicle collisions there dropped dramatically and thousands of deer and pronghorn now cross over the traffic.",
+    "MeatEater Podcast Ep. 162, 'Landscape of Fear,' put this science in front of the hunting public: Steven Rinella with Dr. Matt Kauffman (Wyoming Migration Initiative) and Dr. Kevin Monteith, talking green-wave surfing, stopovers, and why corridors like Red Desert-to-Hoback decide the fate of Western mule deer."
+  ]
+}
