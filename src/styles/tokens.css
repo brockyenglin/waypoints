@@ -25,9 +25,11 @@
   --viz-4: #3d9fd1;          /* open water — fish */
   --viz-neutral: #8c9088;    /* historic/extinct — always dashed */
 
-  --font-display: 'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
+  /* One family everywhere: Inter reads modern, not techy. The former mono
+     slot keeps its role (data chrome) via tabular numerals + tracking. */
+  --font-display: 'Inter Variable', 'Inter', -apple-system, system-ui, sans-serif;
   --font-body: 'Inter Variable', 'Inter', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', 'SFMono-Regular', monospace;
+  --font-mono: 'Inter Variable', 'Inter', -apple-system, sans-serif;
 
   --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-dry: cubic-bezier(0.19, 1, 0.22, 1);

@@ -39,14 +39,15 @@ section[id], article[id] { scroll-margin-top: 78px; }
 /* --- Voices --- */
 .display {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.04;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
 }
 .mono {
   font-family: var(--font-mono);
   font-size: 12px;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 .datum {

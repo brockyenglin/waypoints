@@ -46,7 +46,7 @@ Nothing on the site is invented: coordinates come from the datasets, scale bars 
 
 ## Design system — "Living Atlas"
 
-Dark field instrument: forest black, conifer green, ember orange. Space Grotesk / Inter / JetBrains Mono. Data-series colors validated for colorblind separation and contrast (all pairs). Full spec: [src/data/tokens.json](src/data/tokens.json).
+Dark field instrument: forest black, conifer green, ember orange. Inter throughout (tabular numerals for data chrome). Data-series colors validated for colorblind separation and contrast (all pairs). Full spec: [src/data/tokens.json](src/data/tokens.json).
 
 ## Architecture
 

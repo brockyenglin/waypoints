@@ -1,8 +1,6 @@
 // Waypoints — home: the cinematic globe + field studies + essays.
 // The full instrument lives at /atlas/ (src/atlas.js).
-import '@fontsource-variable/space-grotesk'
 import '@fontsource-variable/inter'
-import '@fontsource-variable/jetbrains-mono'
 import './styles/tokens.css'
 import './styles/base.css'
 import './styles/sections.css'

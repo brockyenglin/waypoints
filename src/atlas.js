@@ -1,8 +1,6 @@
 // Waypoints — the Atlas: the full instrument. 583 layers, era toggle,
 // compare, live-resolution density. The cinematic home lives at ../ (home.js).
-import '@fontsource-variable/space-grotesk'
 import '@fontsource-variable/inter'
-import '@fontsource-variable/jetbrains-mono'
 import './styles/tokens.css'
 import './styles/base.css'
 import './styles/sections.css'
