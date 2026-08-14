@@ -892,6 +892,30 @@ export function createGlobe(container, opts) {
     return true
   }
 
+  // View center + angular radius of the settled view, in globe-local degrees.
+  // Null when the center ray misses the sphere. Shared by the live density and
+  // live earth systems.
+  function computeViewBox() {
+    if (!livePick(0, 0, liveCenter)) return null
+    liveInv.copy(globe.matrixWorld).invert()
+    liveLocal.copy(liveCenter).applyMatrix4(liveInv).normalize()
+    const centerLat = 90 - Math.acos(THREE.MathUtils.clamp(liveLocal.y, -1, 1)) / DEG
+    let centerLng = Math.atan2(liveLocal.z, -liveLocal.x) / DEG - 180
+    if (centerLng < -180) centerLng += 360
+
+    // Angular radius of the view: the farthest visible corner, clamped to the
+    // horizon when a corner misses the sphere — then capped well inside the
+    // horizon. The limb is foreshortened past reading anyway, and covering it
+    // would force a huge low-zoom box; the global texture holds the edges.
+    const horizon = Math.acos(Math.min(1, R / camera.position.length()))
+    let ang = 0
+    for (const [nx, ny] of LIVE_CORNERS) {
+      ang = Math.max(ang, livePick(nx, ny, liveCorner) ? liveCorner.angleTo(liveCenter) : horizon)
+    }
+    const angDeg = (Math.min(ang, horizon * 0.65) / DEG) * 1.15 // ~15% pad each side
+    return { centerLat, centerLng, angDeg }
+  }
+
   // GBIF EPSG:4326 tiling: zoom Z has 2^(Z+1) columns x 2^Z rows over 360x180;
   // x from 180W, y from the north. Clamped to the valid tile range — no
   // antimeridian wrap (v1).
@@ -909,23 +933,10 @@ export function createGlobe(container, opts) {
   // Decide whether the settled view needs a new regional drape, and start one.
   function evaluateLive() {
     const spec = liveSpec
-    if (!spec || !livePick(0, 0, liveCenter)) return
-    liveInv.copy(globe.matrixWorld).invert()
-    liveLocal.copy(liveCenter).applyMatrix4(liveInv).normalize()
-    const centerLat = 90 - Math.acos(THREE.MathUtils.clamp(liveLocal.y, -1, 1)) / DEG
-    let centerLng = Math.atan2(liveLocal.z, -liveLocal.x) / DEG - 180
-    if (centerLng < -180) centerLng += 360
-
-    // Angular radius of the view: the farthest visible corner, clamped to the
-    // horizon when a corner misses the sphere — then capped well inside the
-    // horizon. The limb is foreshortened past reading anyway, and covering it
-    // would force a huge low-zoom box; the global texture holds the edges.
-    const horizon = Math.acos(Math.min(1, R / camera.position.length()))
-    let ang = 0
-    for (const [nx, ny] of LIVE_CORNERS) {
-      ang = Math.max(ang, livePick(nx, ny, liveCorner) ? liveCorner.angleTo(liveCenter) : horizon)
-    }
-    const angDeg = (Math.min(ang, horizon * 0.65) / DEG) * 1.15 // ~15% pad each side
+    if (!spec) return
+    const view = computeViewBox()
+    if (!view) return
+    const { centerLat, centerLng, angDeg } = view
 
     // Smallest GBIF zoom giving >= ~1.2 texture px per screen px of view width
     // (tiles are 512 css px, fetched @2x -> 1024 px per tile).
@@ -1057,6 +1068,210 @@ export function createGlobe(container, opts) {
     } catch { /* silent — the global texture is always underneath */ }
   }
 
+  /* ---- live earth: GIBS Blue Marble regions ---- */
+
+  // Deep-zoom earth imagery: when the camera settles zoomed in, drape NASA
+  // GIBS Blue Marble tiles over the viewed region so the earth itself
+  // re-resolves — the density system's skeleton applied to the base surface.
+  // Always on (no spec needed); unlike density it keeps working in compare
+  // mode, since it sits under both clip overlays. All failures are silent;
+  // the global day texture is always underneath.
+  let liveEarthOn = true
+  let earthMesh = null     // at most one regional drape at a time
+  let earthRegion = null   // { L, latN, latS, lngW, lngE } of earthMesh
+  let earthGen = 0         // bumps on movement/disable; stale builds abandon
+  let earthAbort = null    // aborted only on disable, so panned-away builds still fill the cache
+  let earthEvaluated = false
+  const EARTH_BUILD_Z = 2.2  // hysteresis: build below this...
+  const EARTH_DROP_Z = 2.35  // ...fade out and dispose above this
+  const earthTileCache = new Map() // url -> Promise<ImageBitmap|null>, LRU order
+
+  function earthTile(url, signal) {
+    if (earthTileCache.has(url)) {
+      const hit = earthTileCache.get(url)
+      earthTileCache.delete(url)
+      earthTileCache.set(url, hit)
+      return hit
+    }
+    const p = fetch(url, { signal })
+      .then((r) => (r.ok ? r.blob() : Promise.reject(new Error('tile'))))
+      .then((blob) => createImageBitmap(blob))
+      .catch(() => {
+        if (earthTileCache.get(url) === p) earthTileCache.delete(url) // failed/aborted: retry on a later build
+        return null
+      })
+    earthTileCache.set(url, p)
+    for (const [k, v] of earthTileCache) {
+      if (earthTileCache.size <= 64) break
+      if (v === p) continue
+      earthTileCache.delete(k)
+      v.then((bm) => { if (bm) bm.close() }).catch(() => {})
+    }
+    return p
+  }
+
+  function disposeEarthMesh() {
+    if (!earthMesh) return
+    globe.remove(earthMesh)
+    earthMesh.geometry.dispose()
+    if (earthMesh.material.map) earthMesh.material.map.dispose()
+    earthMesh.material.dispose()
+    earthMesh = null
+  }
+
+  // GIBS WMTS EPSG:4326 tiling (BlueMarble_NextGeneration, 500m tile matrix):
+  // levels 0..7, 512px tiles, 0.5625 / 2^L degrees per pixel, so a tile spans
+  // 288 / 2^L degrees; col from 180W, row from the north. The rightmost column
+  // and bottom row are partial (512px JPEGs padded past 180E / 90S) — the
+  // build crops them off via texture.repeat/offset.
+  function earthTileGrid(L, latN, latS, lngW, lngE) {
+    const step = 288 / (1 << L)
+    const maxC = Math.ceil(360 / step) - 1
+    const maxR = Math.ceil(180 / step) - 1
+    const c0 = Math.max(0, Math.min(maxC, Math.floor((lngW + 180) / step)))
+    const c1 = Math.max(0, Math.min(maxC, Math.ceil((lngE + 180) / step) - 1))
+    const r0 = Math.max(0, Math.min(maxR, Math.floor((90 - latN) / step)))
+    const r1 = Math.max(0, Math.min(maxR, Math.ceil((90 - latS) / step) - 1))
+    return { c0, c1, r0, r1, cols: c1 - c0 + 1, rows: r1 - r0 + 1 }
+  }
+
+  // Decide whether the settled view needs a new earth drape, and start one.
+  function evaluateEarth() {
+    const view = computeViewBox()
+    if (!view) return
+    const { centerLat, centerLng, angDeg } = view
+
+    // Smallest GIBS level giving >= ~1.1 texture px per screen px of the view
+    // span (0.5625 / 2^L degrees per texture px).
+    const spanDeg = angDeg * 2
+    const maxL = bigScreen ? 7 : 6
+    let L = 2
+    while (L < maxL && (spanDeg * (1 << L)) / 0.5625 < 1.1 * width) L++
+
+    const cosLat = Math.max(0.2, Math.cos(centerLat * DEG))
+    const latN = Math.min(90, centerLat + angDeg)
+    const latS = Math.max(-90, centerLat - angDeg)
+    const lngW = Math.max(-180, centerLng - angDeg / cosLat)
+    const lngE = Math.min(180, centerLng + angDeg / cosLat)
+
+    // Fit the tile grid under the cap: prefer dropping L, then trim the edges
+    // around the view center.
+    const maxRows = bigScreen ? 3 : 2 // 4x3 = 12 tiles; 4x2 = 8 on small screens
+    let g = earthTileGrid(L, latN, latS, lngW, lngE)
+    while (L > 2 && (g.cols > 4 || g.rows > maxRows)) {
+      L--
+      g = earthTileGrid(L, latN, latS, lngW, lngE)
+    }
+    const step = 288 / (1 << L)
+    if (g.cols > 4 || g.rows > maxRows) {
+      const cc = Math.floor((centerLng + 180) / step)
+      const cr = Math.floor((90 - centerLat) / step)
+      if (g.cols > 4) {
+        g.c0 = Math.max(g.c0, Math.min(cc - 2, g.c1 - 3))
+        g.c1 = g.c0 + 3
+      }
+      if (g.rows > maxRows) {
+        g.r0 = Math.max(g.r0, Math.min(cr - (maxRows >> 1), g.r1 - (maxRows - 1)))
+        g.r1 = g.r0 + maxRows - 1
+      }
+      g.cols = g.c1 - g.c0 + 1
+      g.rows = g.r1 - g.r0 + 1
+    }
+
+    // Tile-range box clamped to the world edges (partial edge tiles overshoot).
+    const boxN = 90 - g.r0 * step
+    const boxS = Math.max(-90, 90 - (g.r1 + 1) * step)
+    const boxW = g.c0 * step - 180
+    const boxE = Math.min(180, (g.c1 + 1) * step - 180)
+
+    // Still good? Same L and the view center sits in the region's inner 60%.
+    if (earthMesh && earthRegion && earthRegion.L === L) {
+      const mLat = 0.2 * (earthRegion.latN - earthRegion.latS)
+      const mLng = 0.2 * (earthRegion.lngE - earthRegion.lngW)
+      if (centerLat < earthRegion.latN - mLat && centerLat > earthRegion.latS + mLat &&
+          centerLng > earthRegion.lngW + mLng && centerLng < earthRegion.lngE - mLng) {
+        earthMesh.userData.targetOpacity = 1 // un-fade if we dipped past the drop zoom
+        return
+      }
+    }
+
+    earthGen++
+    if (!earthAbort) earthAbort = new AbortController()
+    buildEarthRegion(earthGen, L, g, boxN, boxS, boxW, boxE, earthAbort.signal)
+  }
+
+  async function buildEarthRegion(gen, L, g, boxN, boxS, boxW, boxE, signal) {
+    try {
+      const jobs = []
+      for (let tr = g.r0; tr <= g.r1; tr++) {
+        for (let tc = g.c0; tc <= g.c1; tc++) {
+          const url = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/' +
+            `BlueMarble_NextGeneration/default/default/500m/${L}/${tr}/${tc}.jpeg`
+          jobs.push(earthTile(url, signal).then((bm) => ({ bm, tr, tc })))
+        }
+      }
+      const tiles = await Promise.all(jobs)
+      if (gen !== earthGen) return
+      const w = g.cols * 512
+      const h = g.rows * 512
+      let canvas
+      if (typeof OffscreenCanvas !== 'undefined') {
+        canvas = new OffscreenCanvas(w, h)
+      } else {
+        canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+      }
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      let drew = false
+      for (const tile of tiles) {
+        if (!tile.bm) continue // missing tile: a gap; the base earth shows through
+        try {
+          ctx.drawImage(tile.bm, (tile.tc - g.c0) * 512, (tile.tr - g.r0) * 512, 512, 512)
+          drew = true
+        } catch { /* bitmap evicted mid-build */ }
+      }
+      if (!drew || gen !== earthGen) return
+
+      const map = new THREE.CanvasTexture(canvas)
+      map.colorSpace = THREE.SRGBColorSpace
+      map.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy())
+      map.generateMipmaps = false
+      map.minFilter = THREE.LinearFilter
+      // Crop partial edge tiles: the canvas covers the full tile range, the
+      // mesh only the clamped box (canvas row 0 = north = v 1; the west and
+      // north edges always align, so only repeat + offset.y are needed).
+      const step = 288 / (1 << L)
+      map.repeat.x = (boxE - boxW) / (g.cols * step)
+      map.repeat.y = (boxN - boxS) / (g.rows * step)
+      map.offset.y = 1 - map.repeat.y
+      // Partial sphere spanning exactly the clamped box, same phi/theta
+      // convention as the regionHi patch.
+      const segs = (deg) => Math.max(12, Math.min(128, Math.round(deg)))
+      const geo = new THREE.SphereGeometry(
+        R * 1.0006, segs(boxE - boxW), segs(boxN - boxS),
+        (boxW + 180) * DEG, (boxE - boxW) * DEG,
+        (90 - boxN) * DEG, (boxN - boxS) * DEG,
+      )
+      // Phong like the regionHi patch, so day lighting stays continuous.
+      const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+        map,
+        specular: new THREE.Color(0x1e2933),
+        shininess: 20,
+        transparent: true,
+        opacity: 0,
+      }))
+      mesh.renderOrder = 1.5 // above the regionHi patch, below the data shells
+      mesh.userData.targetOpacity = 1
+      if (reducedMotion) mesh.material.opacity = 1
+      disposeEarthMesh()
+      earthMesh = mesh
+      earthRegion = { L, latN: boxN, latS: boxS, lngW: boxW, lngE: boxE }
+      globe.add(mesh)
+    } catch { /* silent — the base earth is always underneath */ }
+  }
+
   // --- Sizing ---
   let width = 1
   let height = 1
@@ -1146,9 +1361,10 @@ export function createGlobe(container, opts) {
       patch.visible = m.opacity > 0.02
     }
 
-    // Live GBIF density: rebuild the regional drape only once the camera has
-    // settled (~350ms without input or motion); movement abandons stale builds.
-    if (liveSpec) {
+    // Live regional drapes (GBIF density, GIBS earth): rebuild only once the
+    // camera has settled (~350ms without input or motion); movement abandons
+    // stale builds. One settle tracker feeds both systems.
+    if (liveSpec || liveEarthOn) {
       const cz = camera.position.z
       const movedNow = dragging ||
         Math.abs(rotY - livePrevRotY) + Math.abs(rotX - livePrevRotX) + Math.abs(cz - livePrevZ) > 0.0001
@@ -1158,21 +1374,35 @@ export function createGlobe(container, opts) {
       if (movedNow) {
         liveSettle = 0
         liveEvaluated = false
-        liveGen++
+        earthEvaluated = false
+        earthGen++
+        if (liveSpec) liveGen++
       } else {
         liveSettle += dt
       }
-      if (overlayB.visible) {
-        // compare mode owns the data shells — stand down until it ends
-        liveGen++
-        liveEvaluated = false
-        disposeLiveMesh()
-        liveRegion = null
-      } else if (cz > LIVE_DROP_Z) {
-        if (liveMesh) liveMesh.userData.targetOpacity = 0
-      } else if (cz < LIVE_BUILD_Z && liveSettle > 0.35 && !liveEvaluated) {
-        liveEvaluated = true
-        evaluateLive()
+      if (liveSpec) {
+        if (overlayB.visible) {
+          // compare mode owns the data shells — stand down until it ends
+          liveGen++
+          liveEvaluated = false
+          disposeLiveMesh()
+          liveRegion = null
+        } else if (cz > LIVE_DROP_Z) {
+          if (liveMesh) liveMesh.userData.targetOpacity = 0
+        } else if (cz < LIVE_BUILD_Z && liveSettle > 0.35 && !liveEvaluated) {
+          liveEvaluated = true
+          evaluateLive()
+        }
+      }
+      // The earth drape ignores compare mode — it's the base surface under
+      // both clip overlays.
+      if (liveEarthOn) {
+        if (cz > EARTH_DROP_Z) {
+          if (earthMesh) earthMesh.userData.targetOpacity = 0
+        } else if (cz < EARTH_BUILD_Z && liveSettle > 0.35 && !earthEvaluated) {
+          earthEvaluated = true
+          evaluateEarth()
+        }
       }
     }
     if (liveMesh) {
@@ -1183,6 +1413,16 @@ export function createGlobe(container, opts) {
       if (want === 0 && m.opacity < 0.02) {
         disposeLiveMesh()
         liveRegion = null
+      }
+    }
+    if (earthMesh) {
+      const m = earthMesh.material
+      const want = earthMesh.userData.targetOpacity
+      m.opacity = reducedMotion ? want : m.opacity + (want - m.opacity) * Math.min(1, dt * 6)
+      earthMesh.visible = m.opacity > 0.01
+      if (want === 0 && m.opacity < 0.02) {
+        disposeEarthMesh()
+        earthRegion = null
       }
     }
     // The coarse global drape yields while the live region carries the view:
@@ -1289,6 +1529,17 @@ export function createGlobe(container, opts) {
     liveDebug() {
       return { spec: !!liveSpec, settle: liveSettle, evaluated: liveEvaluated, mesh: !!liveMesh, region: liveRegion, z: camera.position.z, gen: liveGen }
     },
+    // Deep-zoom earth imagery (NASA GIBS Blue Marble). On by default; false
+    // disposes the drape, cancels in-flight fetches, and disables.
+    setLiveEarth(on) {
+      liveEarthOn = !!on
+      if (liveEarthOn) return
+      earthGen++
+      if (earthAbort) { earthAbort.abort(); earthAbort = null }
+      disposeEarthMesh()
+      earthRegion = null
+      earthEvaluated = false
+    },
     focusStory(id, { offsetScale = 1 } = {}) {
       if (!builders[id] || !stories[id]) return
       if (activeStory && storyGroups[activeStory]) storyGroups[activeStory].group.visible = false
@@ -1331,6 +1582,11 @@ export function createGlobe(container, opts) {
       disposeLiveMesh()
       for (const p of liveTileCache.values()) p.then((bm) => { if (bm) bm.close() }).catch(() => {})
       liveTileCache.clear()
+      earthGen++
+      if (earthAbort) { earthAbort.abort(); earthAbort = null }
+      disposeEarthMesh()
+      for (const p of earthTileCache.values()) p.then((bm) => { if (bm) bm.close() }).catch(() => {})
+      earthTileCache.clear()
       renderer.dispose()
       container.removeChild(renderer.domElement)
     },
