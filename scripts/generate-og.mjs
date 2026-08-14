@@ -31,8 +31,9 @@ fs.mkdirSync(ogDir, { recursive: true })
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
 
 function sharePage({ id, kind, title, description }) {
-  const target = kind === 'story' ? `../../?study=${id}` : `../../?layer=${id}`
-  const canonical = kind === 'story' ? `${ORIGIN}/?study=${id}` : `${ORIGIN}/?layer=${id}`
+  // Layers open in the atlas app; field studies open on the home globe.
+  const target = kind === 'story' ? `../../?study=${id}` : `../../atlas/?layer=${id}`
+  const canonical = kind === 'story' ? `${ORIGIN}/?study=${id}` : `${ORIGIN}/atlas/?layer=${id}`
   return `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
@@ -56,13 +57,15 @@ function sharePage({ id, kind, title, description }) {
 </body></html>`
 }
 
+const PAGES_ONLY = process.argv.includes('--pages-only') // retarget redirects without recomposing images
+
 let n = 0
 // Default card (no layer drape — the bare living earth)
-await composeCard({ entry: null, out: path.join(ogDir, 'default.jpg'), width: 1200, height: 630, layout: 'og' })
+if (!PAGES_ONLY) await composeCard({ entry: null, out: path.join(ogDir, 'default.jpg'), width: 1200, height: 630, layout: 'og' })
 
 for (const raw of layers) {
   const l = defaultView(raw)
-  await composeCard({ entry: l, out: path.join(ogDir, `${l.id}.jpg`), width: 1200, height: 630, layout: 'og' })
+  if (!PAGES_ONLY) await composeCard({ entry: l, out: path.join(ogDir, `${l.id}.jpg`), width: 1200, height: 630, layout: 'og' })
   const dir = path.join(root, 'public', 'l', l.id)
   fs.mkdirSync(dir, { recursive: true })
   fs.writeFileSync(path.join(dir, 'index.html'), sharePage({ id: l.id, kind: 'layer', title: l.title, description: l.caption }))
@@ -70,7 +73,7 @@ for (const raw of layers) {
 }
 
 for (const s of STORIES) {
-  await composeCard({ entry: { title: s.title, caption: s.caption, freshness: 'WAYPOINTS FIELD STUDY' }, out: path.join(ogDir, `${s.id}.jpg`), width: 1200, height: 630, layout: 'og' })
+  if (!PAGES_ONLY) await composeCard({ entry: { title: s.title, caption: s.caption, freshness: 'WAYPOINTS FIELD STUDY' }, out: path.join(ogDir, `${s.id}.jpg`), width: 1200, height: 630, layout: 'og' })
   const dir = path.join(root, 'public', 's', s.id)
   fs.mkdirSync(dir, { recursive: true })
   fs.writeFileSync(path.join(dir, 'index.html'), sharePage({ id: s.id, kind: 'story', title: s.title, description: s.caption }))

@@ -815,6 +815,248 @@ export function createGlobe(container, opts) {
     })
   }
 
+  /* ---------------- live GBIF density ---------------- */
+
+  // Viewport-matched occurrence-density tiles: when the camera settles zoomed
+  // in, fetch just the visible region from the GBIF map API at a zoom level
+  // matched to the view and drape it above the global overlay — the same idea
+  // as the lazy regionHi earth patch, but for live data. All failures are
+  // silent; the static global texture is always underneath.
+  let liveSpec = null      // { taxonKey, filters, opacity } or null
+  let liveBaseOpacity = null // the active layer's own overlay opacity, for live-region dimming
+  let liveMesh = null      // at most one regional drape at a time
+  let liveRegion = null    // { Z, latN, latS, lngW, lngE } of liveMesh
+  let liveGen = 0          // bumps on movement/spec change; stale builds abandon
+  let liveAbort = null     // aborted only on spec change/disable, so panned-away builds still fill the cache
+  let liveSettle = 0
+  let liveEvaluated = false
+  let livePrevRotY = 0
+  let livePrevRotX = 0
+  let livePrevZ = 0
+  const LIVE_BUILD_Z = 2.4 // hysteresis: build below this...
+  const LIVE_DROP_Z = 2.6  // ...fade out and dispose above this
+  const liveTileCache = new Map() // url -> Promise<ImageBitmap|null>, LRU order
+
+  function liveTile(url, signal) {
+    if (liveTileCache.has(url)) {
+      const hit = liveTileCache.get(url)
+      liveTileCache.delete(url)
+      liveTileCache.set(url, hit)
+      return hit
+    }
+    const p = fetch(url, { signal })
+      .then((r) => (r.ok ? r.blob() : Promise.reject(new Error('tile'))))
+      .then((blob) => createImageBitmap(blob))
+      .catch(() => {
+        if (liveTileCache.get(url) === p) liveTileCache.delete(url) // failed/aborted: retry on a later build
+        return null
+      })
+    liveTileCache.set(url, p)
+    for (const [k, v] of liveTileCache) {
+      if (liveTileCache.size <= 48) break
+      if (v === p) continue
+      liveTileCache.delete(k)
+      v.then((bm) => { if (bm) bm.close() }).catch(() => {})
+    }
+    return p
+  }
+
+  function disposeLiveMesh() {
+    if (!liveMesh) return
+    globe.remove(liveMesh)
+    liveMesh.geometry.dispose()
+    if (liveMesh.material.map) liveMesh.material.map.dispose()
+    liveMesh.material.dispose()
+    liveMesh = null
+  }
+
+  const liveNDC = new THREE.Vector2()
+  const liveCenter = new THREE.Vector3()
+  const liveCorner = new THREE.Vector3()
+  const liveLocal = new THREE.Vector3()
+  const liveInv = new THREE.Matrix4()
+  const LIVE_CORNERS = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
+
+  // Ray from an NDC point to the sphere surface (world space); false on miss.
+  function livePick(nx, ny, out) {
+    liveNDC.set(nx, ny)
+    raycaster.setFromCamera(liveNDC, camera)
+    const o = raycaster.ray.origin
+    const d = raycaster.ray.direction
+    const b = o.dot(d)
+    const disc = b * b - (o.dot(o) - R * R)
+    if (disc < 0) return false
+    const t = -b - Math.sqrt(disc)
+    if (t < 0) return false
+    out.copy(d).multiplyScalar(t).add(o)
+    return true
+  }
+
+  // GBIF EPSG:4326 tiling: zoom Z has 2^(Z+1) columns x 2^Z rows over 360x180;
+  // x from 180W, y from the north. Clamped to the valid tile range — no
+  // antimeridian wrap (v1).
+  function liveTileGrid(Z, latN, latS, lngW, lngE) {
+    const step = 180 / (1 << Z)
+    const maxX = (1 << (Z + 1)) - 1
+    const maxY = (1 << Z) - 1
+    const x0 = Math.max(0, Math.min(maxX, Math.floor((lngW + 180) / step)))
+    const x1 = Math.max(0, Math.min(maxX, Math.ceil((lngE + 180) / step) - 1))
+    const y0 = Math.max(0, Math.min(maxY, Math.floor((90 - latN) / step)))
+    const y1 = Math.max(0, Math.min(maxY, Math.ceil((90 - latS) / step) - 1))
+    return { x0, x1, y0, y1, cols: x1 - x0 + 1, rows: y1 - y0 + 1 }
+  }
+
+  // Decide whether the settled view needs a new regional drape, and start one.
+  function evaluateLive() {
+    const spec = liveSpec
+    if (!spec || !livePick(0, 0, liveCenter)) return
+    liveInv.copy(globe.matrixWorld).invert()
+    liveLocal.copy(liveCenter).applyMatrix4(liveInv).normalize()
+    const centerLat = 90 - Math.acos(THREE.MathUtils.clamp(liveLocal.y, -1, 1)) / DEG
+    let centerLng = Math.atan2(liveLocal.z, -liveLocal.x) / DEG - 180
+    if (centerLng < -180) centerLng += 360
+
+    // Angular radius of the view: the farthest visible corner, clamped to the
+    // horizon when a corner misses the sphere — then capped well inside the
+    // horizon. The limb is foreshortened past reading anyway, and covering it
+    // would force a huge low-zoom box; the global texture holds the edges.
+    const horizon = Math.acos(Math.min(1, R / camera.position.length()))
+    let ang = 0
+    for (const [nx, ny] of LIVE_CORNERS) {
+      ang = Math.max(ang, livePick(nx, ny, liveCorner) ? liveCorner.angleTo(liveCenter) : horizon)
+    }
+    const angDeg = (Math.min(ang, horizon * 0.65) / DEG) * 1.15 // ~15% pad each side
+
+    // Smallest GBIF zoom giving >= ~1.2 texture px per screen px of view width
+    // (tiles are 512 css px, fetched @2x -> 1024 px per tile).
+    const spanDeg = Math.max(2, angDeg * 2)
+    const maxZ = bigScreen ? 7 : 5
+    let Z = 2
+    while (Z < maxZ && (spanDeg * 1024 * (1 << Z)) / 180 < 1.2 * width) Z++
+
+    const cosLat = Math.max(0.2, Math.cos(centerLat * DEG))
+    const latN = Math.min(90, centerLat + angDeg)
+    const latS = Math.max(-90, centerLat - angDeg)
+    const lngW = Math.max(-180, centerLng - angDeg / cosLat)
+    const lngE = Math.min(180, centerLng + angDeg / cosLat)
+
+    // Fit the tile grid under the cap: prefer dropping Z, then trim the edges
+    // around the view center.
+    const maxRows = bigScreen ? 3 : 2 // 4x3 = 12 tiles; 4x2 = 8 on small screens
+    let g = liveTileGrid(Z, latN, latS, lngW, lngE)
+    while (Z > 2 && (g.cols > 4 || g.rows > maxRows)) {
+      Z--
+      g = liveTileGrid(Z, latN, latS, lngW, lngE)
+    }
+    const step = 180 / (1 << Z)
+    if (g.cols > 4 || g.rows > maxRows) {
+      const cx = Math.floor((centerLng + 180) / step)
+      const cy = Math.floor((90 - centerLat) / step)
+      if (g.cols > 4) {
+        g.x0 = Math.max(g.x0, Math.min(cx - 2, g.x1 - 3))
+        g.x1 = g.x0 + 3
+      }
+      if (g.rows > maxRows) {
+        g.y0 = Math.max(g.y0, Math.min(cy - (maxRows >> 1), g.y1 - (maxRows - 1)))
+        g.y1 = g.y0 + maxRows - 1
+      }
+      g.cols = g.x1 - g.x0 + 1
+      g.rows = g.y1 - g.y0 + 1
+    }
+
+    const boxN = 90 - g.y0 * step
+    const boxS = 90 - (g.y1 + 1) * step
+    const boxW = g.x0 * step - 180
+    const boxE = (g.x1 + 1) * step - 180
+
+    // Still good? Same Z and the view center sits in the region's inner 60%.
+    if (liveMesh && liveRegion && liveRegion.Z === Z) {
+      const mLat = 0.2 * (liveRegion.latN - liveRegion.latS)
+      const mLng = 0.2 * (liveRegion.lngE - liveRegion.lngW)
+      if (centerLat < liveRegion.latN - mLat && centerLat > liveRegion.latS + mLat &&
+          centerLng > liveRegion.lngW + mLng && centerLng < liveRegion.lngE - mLng) {
+        liveMesh.userData.targetOpacity = spec.opacity ?? 1 // un-fade if we dipped past the drop zoom
+        return
+      }
+    }
+
+    liveGen++
+    if (!liveAbort) liveAbort = new AbortController()
+    buildLiveRegion(liveGen, spec, Z, g, boxN, boxS, boxW, boxE, liveAbort.signal)
+  }
+
+  async function buildLiveRegion(gen, spec, Z, g, boxN, boxS, boxW, boxE, signal) {
+    try {
+      const jobs = []
+      for (let ty = g.y0; ty <= g.y1; ty++) {
+        for (let tx = g.x0; tx <= g.x1; tx++) {
+          const url = `https://api.gbif.org/v2/map/occurrence/density/${Z}/${tx}/${ty}@2x.png` +
+            `?srs=EPSG%3A4326&taxonKey=${spec.taxonKey}&style=classic.point${spec.filters ? '&' + spec.filters : ''}`
+          jobs.push(liveTile(url, signal).then((bm) => ({ bm, tx, ty })))
+        }
+      }
+      const tiles = await Promise.all(jobs)
+      if (gen !== liveGen) return
+      const w = g.cols * 1024
+      const h = g.rows * 1024
+      let canvas
+      if (typeof OffscreenCanvas !== 'undefined') {
+        canvas = new OffscreenCanvas(w, h)
+      } else {
+        canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+      }
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      let drew = false
+      ctx.filter = 'blur(2px)' // soften the raw density bins into a field
+      for (const tile of tiles) {
+        if (!tile.bm) continue // missing tile: a gap; the global layer shows through
+        try {
+          ctx.drawImage(tile.bm, (tile.tx - g.x0) * 1024, (tile.ty - g.y0) * 1024, 1024, 1024)
+          drew = true
+        } catch { /* bitmap evicted mid-build */ }
+      }
+      ctx.filter = 'none'
+      if (!drew || gen !== liveGen) return
+      // The blur diluted alpha; two additive self-draws restore the punch
+      // (approximates the build pipeline's alpha x3 gain).
+      ctx.globalCompositeOperation = 'lighter'
+      ctx.drawImage(canvas, 0, 0)
+      ctx.drawImage(canvas, 0, 0)
+      ctx.globalCompositeOperation = 'source-over'
+
+      const map = new THREE.CanvasTexture(canvas)
+      map.colorSpace = THREE.SRGBColorSpace
+      map.anisotropy = Math.min(2, renderer.capabilities.getMaxAnisotropy())
+      map.generateMipmaps = false
+      map.minFilter = THREE.LinearFilter
+      // Partial sphere spanning exactly the fetched tile box, using the same
+      // lng-to-phi convention as the regionHi patch: phi = lng + 180 from the
+      // west edge, theta = 90 - lat from the north.
+      const segs = (deg) => Math.max(12, Math.min(128, Math.round(deg)))
+      const geo = new THREE.SphereGeometry(
+        R * 1.0068, segs(boxE - boxW), segs(boxN - boxS),
+        (boxW + 180) * DEG, (boxE - boxW) * DEG,
+        (90 - boxN) * DEG, (boxN - boxS) * DEG,
+      )
+      const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+        map,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      }))
+      mesh.renderOrder = 2.5 // above the global overlay, below the clouds
+      mesh.userData.targetOpacity = spec.opacity ?? 1
+      if (reducedMotion) mesh.material.opacity = mesh.userData.targetOpacity
+      disposeLiveMesh()
+      liveMesh = mesh
+      liveRegion = { Z, latN: boxN, latS: boxS, lngW: boxW, lngE: boxE }
+      globe.add(mesh)
+    } catch { /* silent — the global texture is always underneath */ }
+  }
+
   // --- Sizing ---
   let width = 1
   let height = 1
@@ -904,6 +1146,52 @@ export function createGlobe(container, opts) {
       patch.visible = m.opacity > 0.02
     }
 
+    // Live GBIF density: rebuild the regional drape only once the camera has
+    // settled (~350ms without input or motion); movement abandons stale builds.
+    if (liveSpec) {
+      const cz = camera.position.z
+      const movedNow = dragging ||
+        Math.abs(rotY - livePrevRotY) + Math.abs(rotX - livePrevRotX) + Math.abs(cz - livePrevZ) > 0.0001
+      livePrevRotY = rotY
+      livePrevRotX = rotX
+      livePrevZ = cz
+      if (movedNow) {
+        liveSettle = 0
+        liveEvaluated = false
+        liveGen++
+      } else {
+        liveSettle += dt
+      }
+      if (overlayB.visible) {
+        // compare mode owns the data shells — stand down until it ends
+        liveGen++
+        liveEvaluated = false
+        disposeLiveMesh()
+        liveRegion = null
+      } else if (cz > LIVE_DROP_Z) {
+        if (liveMesh) liveMesh.userData.targetOpacity = 0
+      } else if (cz < LIVE_BUILD_Z && liveSettle > 0.35 && !liveEvaluated) {
+        liveEvaluated = true
+        evaluateLive()
+      }
+    }
+    if (liveMesh) {
+      const m = liveMesh.material
+      const want = liveMesh.userData.targetOpacity
+      m.opacity = reducedMotion ? want : m.opacity + (want - m.opacity) * Math.min(1, dt * 12)
+      liveMesh.visible = m.opacity > 0.01
+      if (want === 0 && m.opacity < 0.02) {
+        disposeLiveMesh()
+        liveRegion = null
+      }
+    }
+    // The coarse global drape yields while the live region carries the view:
+    // full-strength both would double-expose big soft bins under crisp tiles.
+    if (overlayA.visible && liveBaseOpacity !== null) {
+      const dim = liveMesh ? liveMesh.material.opacity / Math.max(0.01, liveMesh.userData.targetOpacity || 1) : 0
+      overlayA.material.uniforms.uOpacity.value = liveBaseOpacity * (1 - 0.85 * Math.min(1, dim))
+    }
+
     if (!dragging && canHover) {
       raycaster.setFromCamera(pointer, camera)
       const hits = raycaster.intersectObjects(visiblePickables(), false)
@@ -956,11 +1244,13 @@ export function createGlobe(container, opts) {
       if (!entry) {
         overlayA.visible = false
         overlayA.material.uniforms.uOpacity.value = 0
+        liveBaseOpacity = null
         return
       }
       const u = overlayA.material.uniforms
       u.uMap.value = layerTex(entry.texture)
       u.uOpacity.value = entry.opacity ?? 1
+      liveBaseOpacity = entry.opacity ?? 1
       u.uSide.value = 0
       overlayA.visible = true
     },
@@ -968,6 +1258,8 @@ export function createGlobe(container, opts) {
     setCompare(entryA, entryB, clipCssX) {
       arcGroup.visible = false
       markerGroup.visible = false
+      liveBaseOpacity = null // compare owns the overlay uniforms
+
       for (const [mesh, entry, side] of [[overlayA, entryA, 1], [overlayB, entryB, -1]]) {
         const u = mesh.material.uniforms
         u.uMap.value = layerTex(entry.texture)
@@ -981,6 +1273,21 @@ export function createGlobe(container, opts) {
       const px = cssX * renderer.getPixelRatio()
       overlayA.material.uniforms.uClipX.value = px
       overlayB.material.uniforms.uClipX.value = px
+    },
+    // Live GBIF density drape. spec: { taxonKey, filters, opacity } or null.
+    // filters is a pre-joined query fragment ('year=2000,2026&...'), may be ''.
+    // null disposes the region mesh, cancels in-flight fetches, and disables.
+    setLiveDensity(spec) {
+      liveGen++
+      if (liveAbort) { liveAbort.abort(); liveAbort = null }
+      disposeLiveMesh()
+      liveRegion = null
+      liveSettle = 0
+      liveEvaluated = false
+      liveSpec = spec && spec.taxonKey != null ? spec : null
+    },
+    liveDebug() {
+      return { spec: !!liveSpec, settle: liveSettle, evaluated: liveEvaluated, mesh: !!liveMesh, region: liveRegion, z: camera.position.z, gen: liveGen }
     },
     focusStory(id, { offsetScale = 1 } = {}) {
       if (!builders[id] || !stories[id]) return
@@ -1019,6 +1326,11 @@ export function createGlobe(container, opts) {
       cancelAnimationFrame(raf)
       io.disconnect()
       ro.disconnect()
+      liveGen++
+      if (liveAbort) { liveAbort.abort(); liveAbort = null }
+      disposeLiveMesh()
+      for (const p of liveTileCache.values()) p.then((bm) => { if (bm) bm.close() }).catch(() => {})
+      liveTileCache.clear()
       renderer.dispose()
       container.removeChild(renderer.domElement)
     },

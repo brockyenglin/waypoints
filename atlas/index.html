@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Waypoints Atlas — 583 Layers of the Natural World</title>
+  <meta name="description" content="The Waypoints Atlas: 583 data layers on a living globe — species occurrence records, NASA satellite imagery, and tracked migrations, with era toggle and side-by-side compare." />
+  <meta property="og:title" content="Waypoints Atlas — 583 Layers of the Natural World" />
+  <meta property="og:description" content="583 data layers on a living globe — species records, NASA imagery, tracked migrations. Compare, filter by era, share any view." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Waypoints" />
+  <meta property="og:url" content="https://brockyenglin.github.io/waypoints/atlas/" />
+  <meta property="og:image" content="https://brockyenglin.github.io/waypoints/og/default.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Waypoints Atlas" />
+  <meta name="twitter:image" content="https://brockyenglin.github.io/waypoints/og/default.jpg" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230B0F0C'/%3E%3Crect x='9.5' y='9.5' width='13' height='13' fill='none' stroke='%23E8622C' stroke-width='2.5' transform='rotate(45 16 16)'/%3E%3Crect x='13.5' y='13.5' width='5' height='5' fill='%23E8622C' transform='rotate(45 16 16)'/%3E%3C/svg%3E" />
+  <script type="module" src="/src/atlas.js"></script>
+</head>
+<body class="page-atlas">
+  <div class="grain" aria-hidden="true"></div>
+
+  <nav class="masthead" aria-label="Primary">
+    <a class="wordmark display" href="../">Waypoints<span class="wp filled" aria-hidden="true"></span></a>
+    <div class="masthead-links">
+      <span class="mono atlas-label">ATLAS</span>
+      <a class="rom-link" href="../">Home</a>
+      <a class="rom-link" href="../#sources">Sources</a>
+    </div>
+    <div class="masthead-right">
+      <span class="mono live-badge"><i aria-hidden="true"></i>GBIF + NASA · DATA AUG 2026</span>
+    </div>
+  </nav>
+
+  <main>
+    <section class="atlas" id="atlas">
+      <div class="globe-stage" id="globe-stage" role="img" aria-label="Interactive globe with 583 switchable data layers: species occurrence density from GBIF, NASA satellite imagery, and tracked migrations. Drag to rotate; zoom for higher-resolution data.">
+      </div>
+      <div class="globe-tip map-tip" id="globe-tip" role="status"></div>
+
+      <div class="layer-bar">
+        <div class="layer-chips" id="layer-chips" role="group" aria-label="Globe data layers"></div>
+        <div class="caption-row">
+          <p class="mono layer-caption" id="layer-caption">Tracked migrations on record — three woodcock GPS tracks + the Red Desert–Hoback mule deer corridor · drag to rotate</p>
+          <button class="mono share-btn" id="share-btn" title="Copy a link to this view">⧉ SHARE</button>
+        </div>
+        <div class="density-legend mono" id="density-legend" hidden aria-label="Density scale">
+          <span>FEWER RECORDS</span>
+          <i class="legend-ramp" aria-hidden="true"></i>
+          <span>MORE RECORDS</span>
+          <span class="legend-note">RELATIVE POINT DENSITY · GBIF</span>
+        </div>
+      </div>
+
+      <div class="compare-divider" id="compare-divider" hidden>
+        <div class="divider-line" aria-hidden="true"></div>
+        <button class="divider-handle mono" aria-label="Drag to compare">⇄</button>
+        <span class="mono cmp-label cmp-label-a" id="cmp-label-a"></span>
+        <span class="mono cmp-label cmp-label-b" id="cmp-label-b"></span>
+      </div>
+      <button class="panel-close mono cmp-exit" id="cmp-exit" aria-label="Exit compare" hidden>✕ COMPARE</button>
+
+      <div class="map-controls" aria-label="Map zoom controls">
+        <button class="ctl" id="zoom-in" aria-label="Zoom in">+</button>
+        <button class="ctl" id="zoom-out" aria-label="Zoom out">−</button>
+        <button class="ctl ctl-home" id="zoom-home" aria-label="Reset view" title="Reset view">⌂</button>
+      </div>
+
+      <aside class="catalog" id="catalog" hidden aria-label="Visualization catalog">
+        <div class="catalog-head">
+          <p class="kicker">Atlas catalog</p>
+          <button class="panel-close mono" id="catalog-close" aria-label="Close catalog">✕</button>
+        </div>
+        <input class="catalog-search mono" id="catalog-search" type="search" placeholder="SEARCH LAYERS + STUDIES…" aria-label="Search visualizations" />
+        <div class="catalog-list" id="catalog-list" data-lenis-prevent></div>
+        <p class="mono catalog-foot">EVERY LAYER TRACES TO ITS SOURCE · GBIF + NASA DATA PULLED AUG 2026</p>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

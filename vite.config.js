@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
@@ -6,6 +7,11 @@ export default defineConfig({
     target: 'es2022',
     chunkSizeWarningLimit: 900,
     rollupOptions: {
+      // Two pages, one engine: the cinematic home and the atlas app.
+      input: {
+        main: resolve(import.meta.dirname, 'index.html'),
+        atlas: resolve(import.meta.dirname, 'atlas/index.html'),
+      },
       output: {
         // three is ~600KB and changes only on dependency bumps — keep it
         // cached across app deploys.
