@@ -233,17 +233,21 @@ export function createGlobe(container, opts) {
 
   // --- Earth ---
   const loader = new THREE.TextureLoader()
-  const tex = (url, srgb = true) => {
+  // Screen tiers: phones skip the heavy texture paths, tablets skip only the 8K map.
+  const bigScreen = Math.min(screen.width, screen.height) > 500
+  const desktopScreen = Math.min(screen.width, screen.height) > 900
+  const ANISO = bigScreen ? 8 : 2
+  const tex = (url, srgb = true, aniso = ANISO) => {
     const t = loader.load(url)
     if (srgb) t.colorSpace = THREE.SRGBColorSpace
-    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy())
+    t.anisotropy = Math.min(aniso, renderer.capabilities.getMaxAnisotropy())
     return t
   }
-  const wantHi = textures.dayHi && renderer.capabilities.maxTextureSize >= 8192 && Math.min(screen.width, screen.height) > 500
+  const wantHi = textures.dayHi && renderer.capabilities.maxTextureSize >= 8192 && desktopScreen
   const dayTex = tex(wantHi ? textures.dayHi : textures.day)
   const nightTex = tex(textures.night)
-  const bumpTex = tex(textures.bump, false)
-  const waterTex = tex(textures.water, false)
+  const bumpTex = tex(textures.bump, false, 1)
+  const waterTex = tex(textures.water, false, 1)
 
   const earthMat = new THREE.MeshPhongMaterial({
     map: dayTex,
@@ -272,11 +276,11 @@ export function createGlobe(container, opts) {
 
   // --- Clouds: barely-there, drifting ---
   let clouds = null
-  if (textures.clouds && !reducedMotion) {
+  if (textures.clouds && !reducedMotion && bigScreen) {
     clouds = new THREE.Mesh(
       new THREE.SphereGeometry(R * 1.006, 96, 96),
       new THREE.MeshBasicMaterial({
-        map: tex(textures.clouds),
+        map: tex(textures.clouds, true, 1),
         transparent: true,
         opacity: 0.24,
         blending: THREE.AdditiveBlending,
@@ -331,7 +335,28 @@ export function createGlobe(container, opts) {
   }
   const overlayA = makeOverlay()
   const overlayB = makeOverlay()
-  const layerCache = {} // texture url -> THREE.Texture
+  const layerCache = new Map() // texture url -> THREE.Texture, LRU order
+  // Bounded: evicted layers give back their GPU memory and re-decode on revisit;
+  // textures currently on either overlay are never evicted.
+  function layerTex(url) {
+    if (layerCache.has(url)) {
+      const t = layerCache.get(url)
+      layerCache.delete(url)
+      layerCache.set(url, t)
+      return t
+    }
+    const t = tex(url)
+    if (!bigScreen) { t.generateMipmaps = false; t.minFilter = THREE.LinearFilter }
+    layerCache.set(url, t)
+    const MAX = bigScreen ? 8 : 3
+    for (const [k, v] of layerCache) {
+      if (layerCache.size <= MAX) break
+      if (v === overlayA.material.uniforms.uMap.value || v === overlayB.material.uniforms.uMap.value) continue
+      layerCache.delete(k)
+      v.dispose()
+    }
+    return t
+  }
 
   // --- Atmosphere ---
   // Subdued: a thin haze at the limb, not a halo.
@@ -603,6 +628,10 @@ export function createGlobe(container, opts) {
   let moved = 0
   let lastX = 0
   let lastY = 0
+  let axisLocked = false // touch drags commit to an axis before any rotation
+  let slopX = 0
+  let slopY = 0
+  let dragId = null
   let idleTime = 0
   let zoomTarget = null
   let activeStory = null
@@ -615,7 +644,7 @@ export function createGlobe(container, opts) {
   function maybeLoadPatch() {
     if (patchState !== 'idle' || camera.position.z > 2.9) return
     patchState = 'loading'
-    if (!textures.regionHi || renderer.capabilities.maxTextureSize < 8192) {
+    if (!textures.regionHi || renderer.capabilities.maxTextureSize < 8192 || !bigScreen) {
       patchState = 'unsupported'
       return
     }
@@ -650,9 +679,15 @@ export function createGlobe(container, opts) {
   const el = renderer.domElement
   el.style.touchAction = 'pan-y'
   el.style.cursor = 'grab'
+  // One finger: the browser may pan the page vertically (pan-y).
+  // Two or more: the pinch is ours — the browser must not start a pan.
+  const ownMultiTouch = (e) => { if (e.touches.length >= 2 && e.cancelable) e.preventDefault() }
+  el.addEventListener('touchstart', ownMultiTouch, { passive: false })
+  el.addEventListener('touchmove', ownMultiTouch, { passive: false })
 
   const raycaster = new THREE.Raycaster()
   const pointer = new THREE.Vector2(-10, -10)
+  const canHover = window.matchMedia('(hover: hover)').matches
 
   function toNDC(e, target) {
     const rect = el.getBoundingClientRect()
@@ -660,20 +695,27 @@ export function createGlobe(container, opts) {
     target.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
   }
 
-  // Two active pointers = pinch zoom.
+  // Two active pointers = pinch zoom; any more park the gesture until a pair remains.
   const activePointers = new Map()
   let pinchDist = 0
+  const seedPinch = () => {
+    const [a, b] = [...activePointers.values()]
+    pinchDist = Math.hypot(a.x - b.x, a.y - b.y)
+  }
 
   el.addEventListener('pointerdown', (e) => {
     activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
-    if (activePointers.size === 2) {
-      const [a, b] = [...activePointers.values()]
-      pinchDist = Math.hypot(a.x - b.x, a.y - b.y)
+    if (activePointers.size >= 2) {
       dragging = false
+      if (activePointers.size === 2) seedPinch()
       return
     }
+    dragId = e.pointerId
     dragging = true
     moved = 0
+    axisLocked = e.pointerType !== 'touch' // mouse rotates from the first pixel
+    slopX = 0
+    slopY = 0
     lastX = e.clientX
     lastY = e.clientY
     zoomTarget = null
@@ -694,9 +736,18 @@ export function createGlobe(container, opts) {
       }
       return
     }
-    if (dragging) {
+    if (dragging && e.pointerId === dragId) {
       const dx = e.clientX - lastX
       const dy = e.clientY - lastY
+      if (!axisLocked) {
+        slopX += Math.abs(dx)
+        slopY += Math.abs(dy)
+        lastX = e.clientX
+        lastY = e.clientY
+        if (slopX + slopY < 8) return // undecided — apply nothing yet
+        if (slopY > slopX * 1.2) { dragging = false; return } // vertical: the page scroll owns it
+        axisLocked = true
+      }
       moved += Math.abs(dx) + Math.abs(dy)
       lastX = e.clientX
       lastY = e.clientY
@@ -709,8 +760,11 @@ export function createGlobe(container, opts) {
   })
   const endDrag = (e) => {
     activePointers.delete(e.pointerId)
-    pinchDist = 0
+    if (activePointers.size === 2) seedPinch()
+    else pinchDist = 0
     dragging = false
+    if (e.type === 'pointercancel') velY = 0 // the browser claimed the gesture; no residual spin
+    if (e.pointerType && e.pointerType !== 'mouse') pointer.set(-10, -10) // no resting cursor on touch
     el.style.cursor = hovered ? 'pointer' : 'grab'
     if (e.pointerId !== undefined) { try { el.releasePointerCapture(e.pointerId) } catch { /* released */ } }
   }
@@ -727,6 +781,9 @@ export function createGlobe(container, opts) {
   }, { passive: false })
   el.addEventListener('dblclick', (e) => {
     e.preventDefault()
+    toNDC(e, clickNDC)
+    raycaster.setFromCamera(clickNDC, camera)
+    if (raycaster.intersectObjects(visiblePickables(), false).length) return // marker taps open, not zoom
     nudgeZoom(e.shiftKey ? 1.45 : 0.62)
   })
 
@@ -746,7 +803,7 @@ export function createGlobe(container, opts) {
     toNDC(e, clickNDC)
     raycaster.setFromCamera(clickNDC, camera)
     const hits = raycaster.intersectObjects(visiblePickables(), false)
-    if (hits.length) onMarkerClick(hits[0].object.userData.marker)
+    onMarkerClick(hits.length ? hits[0].object.userData.marker : null) // null = empty tap; dismisses the tooltip
   })
 
   function visiblePickables() {
@@ -781,6 +838,8 @@ export function createGlobe(container, opts) {
   let raf = 0
   const worldPos = new THREE.Vector3()
   const camPos = new THREE.Vector3()
+  const spriteN = new THREE.Vector3()
+  const toCam = new THREE.Vector3()
 
   function frame() {
     raf = requestAnimationFrame(frame)
@@ -821,7 +880,7 @@ export function createGlobe(container, opts) {
     camera.getWorldPosition(camPos)
     for (const s of markerSprites) {
       s.getWorldPosition(worldPos)
-      const facing = worldPos.clone().normalize().dot(camPos.clone().sub(worldPos).normalize())
+      const facing = spriteN.copy(worldPos).normalize().dot(toCam.copy(camPos).sub(worldPos).normalize())
       s.material.opacity = THREE.MathUtils.clamp((facing - 0.06) / 0.22, 0, 1)
       s.visible = facing > 0.06 && markerGroup.visible
       s.userData.pulse = s.visible && s.userData.isStory && !reducedMotion && s !== hovered
@@ -845,7 +904,7 @@ export function createGlobe(container, opts) {
       patch.visible = m.opacity > 0.02
     }
 
-    if (!dragging) {
+    if (!dragging && canHover) {
       raycaster.setFromCamera(pointer, camera)
       const hits = raycaster.intersectObjects(visiblePickables(), false)
       setHover(hits.length ? hits[0].object : null)
@@ -899,9 +958,8 @@ export function createGlobe(container, opts) {
         overlayA.material.uniforms.uOpacity.value = 0
         return
       }
-      if (!layerCache[entry.texture]) layerCache[entry.texture] = tex(entry.texture)
       const u = overlayA.material.uniforms
-      u.uMap.value = layerCache[entry.texture]
+      u.uMap.value = layerTex(entry.texture)
       u.uOpacity.value = entry.opacity ?? 1
       u.uSide.value = 0
       overlayA.visible = true
@@ -911,9 +969,8 @@ export function createGlobe(container, opts) {
       arcGroup.visible = false
       markerGroup.visible = false
       for (const [mesh, entry, side] of [[overlayA, entryA, 1], [overlayB, entryB, -1]]) {
-        if (!layerCache[entry.texture]) layerCache[entry.texture] = tex(entry.texture)
         const u = mesh.material.uniforms
-        u.uMap.value = layerCache[entry.texture]
+        u.uMap.value = layerTex(entry.texture)
         u.uOpacity.value = entry.opacity ?? 1
         u.uSide.value = side
         mesh.visible = true

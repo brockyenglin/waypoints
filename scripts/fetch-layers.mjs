@@ -311,15 +311,15 @@ const SPECIES = [
   { id: "leatherback", name: "Dermochelys coriacea", title: "Leatherback sea turtle", category: "Ocean giants" },
   { id: "green-turtle", name: "Chelonia mydas", title: "Green sea turtle", category: "Ocean giants" },
   { id: "loggerhead", name: "Caretta caretta", title: "Loggerhead sea turtle", category: "Ocean giants" },
-  // Legendary migrants
-  { id: "arctic-tern", name: "Sterna paradisaea", title: "Arctic tern", category: "Legendary migrants" },
-  { id: "godwit", name: "Limosa lapponica", title: "Bar-tailed godwit", category: "Legendary migrants" },
-  { id: "red-knot", name: "Calidris canutus", title: "Red knot", category: "Legendary migrants" },
-  { id: "sooty-shearwater", name: "Ardenna grisea", title: "Sooty shearwater", category: "Legendary migrants" },
-  { id: "common-swift", name: "Apus apus", title: "Common swift", category: "Legendary migrants" },
-  { id: "amur-falcon", name: "Falco amurensis", title: "Amur falcon", category: "Legendary migrants" },
-  { id: "swainsons-hawk", name: "Buteo swainsoni", title: "Swainson's hawk", category: "Legendary migrants" },
-  { id: "wandering-albatross", name: "Diomedea exulans", title: "Wandering albatross", category: "Legendary migrants" },
+  // Long-distance birds
+  { id: "arctic-tern", name: "Sterna paradisaea", title: "Arctic tern", category: "Long-distance birds" },
+  { id: "godwit", name: "Limosa lapponica", title: "Bar-tailed godwit", category: "Long-distance birds" },
+  { id: "red-knot", name: "Calidris canutus", title: "Red knot", category: "Long-distance birds" },
+  { id: "sooty-shearwater", name: "Ardenna grisea", title: "Sooty shearwater", category: "Long-distance birds" },
+  { id: "common-swift", name: "Apus apus", title: "Common swift", category: "Long-distance birds" },
+  { id: "amur-falcon", name: "Falco amurensis", title: "Amur falcon", category: "Long-distance birds" },
+  { id: "swainsons-hawk", name: "Buteo swainsoni", title: "Swainson's hawk", category: "Long-distance birds" },
+  { id: "wandering-albatross", name: "Diomedea exulans", title: "Wandering albatross", category: "Long-distance birds" },
   // Historical (museum records)
   { id: "dodo", name: "Raphus cucullatus", title: "Dodo (museum records)", category: "Historical" },
   { id: "great-auk", name: "Pinguinus impennis", title: "Great auk (museum records)", category: "Historical" },
@@ -718,7 +718,7 @@ for (let i = 0; i < jobs.length; i += 6) {
   console.log(`— batch done (${Math.min(i + 6, jobs.length)}/${jobs.length})`)
 }
 // Keep the drawer tidy: stable category order, alphabetical within.
-const CAT_ORDER = ['Big game', 'Waterfowl', 'Upland birds', 'Raptors', 'Fish', 'Furbearers & small game', 'Reptiles & amphibians', 'Birds & icons', 'Bears of the world', 'Africa', 'Asia', 'Europe', 'South & Central America', 'Australia & Oceania', 'Arctic & Antarctic', 'Ocean giants', 'Legendary migrants', 'Songbirds', 'Waterbirds & shorebirds', 'Saltwater', 'Insects & pollinators', 'Small mammals & primates', 'Historical', 'Habitat', 'Conditions', 'Ocean']
+const CAT_ORDER = ['Big game', 'Waterfowl', 'Upland birds', 'Raptors', 'Fish', 'Furbearers & small game', 'Reptiles & amphibians', 'Birds & icons', 'Bears of the world', 'Africa', 'Asia', 'Europe', 'South & Central America', 'Australia & Oceania', 'Arctic & Antarctic', 'Ocean giants', 'Long-distance birds', 'Songbirds', 'Waterbirds & shorebirds', 'Saltwater', 'Insects & pollinators', 'Small mammals & primates', 'Historical', 'Habitat', 'Conditions', 'Ocean']
 layers.sort((a, b) => (CAT_ORDER.indexOf(a.category) - CAT_ORDER.indexOf(b.category)) || a.title.localeCompare(b.title))
 fs.writeFileSync(path.join(root, 'src', 'data', 'layers.json'), JSON.stringify(layers, null, 2))
 console.log(`layers.json: ${layers.length} layers registered`)

@@ -16,7 +16,7 @@ const layers = JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'layers
 
 const STORIES = [
   { id: 'muledeer', title: '150 miles, twice a year', caption: 'The Red Desert-to-Hoback mule deer migration · Wyoming Migration Initiative / USGS' },
-  { id: 'woodcock', title: 'Gone by morning', caption: 'Three woodcock fall migrations, GPS-tracked · EWMRC / USGS' },
+  { id: 'woodcock', title: 'Gone by morning', caption: 'Three woodcock fall migrations, modeled on EWMRC GPS telemetry · EWMRC / USGS' },
   { id: 'pigeon', title: 'From billions to zero', caption: 'The passenger pigeon, 1810–1914 · historical records' },
 ]
 

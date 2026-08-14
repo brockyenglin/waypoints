@@ -1,6 +1,6 @@
 # Waypoints
 
-**Wildlife data, made visible.** Real wildlife data — GPS collars, banding records, satellite imagery, a century of field notes — rendered on a living globe. Migration corridors, species ranges, and habitat, drawn from public, citable sources.
+**Wildlife data, made visible.** Real wildlife data — GPS collars, banding records, satellite imagery, a century of field notes — rendered on a living globe. Tracked migrations, species occurrence maps, and habitat, drawn from public, citable sources.
 
 **Live:** https://brockyenglin.github.io/waypoints/
 

@@ -13,7 +13,9 @@ import globeData from './data/globe.json'
 import muledeerData from './data/muledeer.json'
 import woodcockData from './data/woodcock.json'
 import pigeonData from './data/pigeon.json'
-import layerRegistry from './data/layers.json'
+// Dynamic import keeps the 579-row registry out of the code chunk: it loads
+// in parallel and the app chunk stays cache-stable across data refreshes.
+const layerRegistry = (await import('./data/layers.json')).default
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const BASE = import.meta.env.BASE_URL
@@ -24,7 +26,10 @@ const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyV
 /* ============ the visualization registry ============
    Everything the viewer can show is a row here. Adding a visualization
    means adding a row (or a fetch-layers entry) — never new UI code. */
-const HINT = ' · drag to rotate · ⌘+scroll / dbl-click to zoom'
+const COARSE = window.matchMedia('(pointer: coarse)').matches
+const HINT = COARSE
+  ? ' · drag to rotate · pinch or +/− to zoom'
+  : ' · drag to rotate · ⌘+scroll / dbl-click to zoom'
 const STATIC_ENTRIES = {
   head: [{
     id: 'migrations',
@@ -91,7 +96,9 @@ track('pageview', new URLSearchParams(location.search).get('layer') || new URLSe
 
 /* ---------- smooth scroll ---------- */
 let lenis = null
-if (!REDUCED) lenis = new Lenis({ autoRaf: true, lerp: 0.115 })
+// syncTouch stays false: touch scrolling must remain native so the globe's
+// touch-action pan-y hand-off (scroll vs rotate) keeps working.
+if (!REDUCED) lenis = new Lenis({ autoRaf: true, lerp: 0.115, syncTouch: false })
 function scrollToEl(target) {
   const el = typeof target === 'string' ? document.querySelector(target) : target
   if (!el) return
@@ -139,8 +146,10 @@ function trackTip() {
     if (!activeMarker) return
     const { x, y } = globe.project(activeMarker)
     const rect = stage.getBoundingClientRect()
-    tipEl.style.left = `${Math.min(Math.max(x + 16, 10), rect.width - 300)}px`
-    tipEl.style.top = `${Math.min(Math.max(y - 14, 10), rect.height - 120)}px`
+    const tw = tipEl.offsetWidth || 280
+    const th = tipEl.offsetHeight || 110
+    tipEl.style.left = `${Math.min(Math.max(x + 16, 10), Math.max(10, rect.width - tw - 10))}px`
+    tipEl.style.top = `${Math.min(Math.max(y - 14, 10), Math.max(10, rect.height - th - 10))}px`
     tipRaf = requestAnimationFrame(loop)
   }
   loop()
@@ -197,28 +206,35 @@ globe = createGlobe(stage, {
     },
   },
   onMarkerClick(m) {
-    if (m.storyId) activate(m.storyId)
+    if (m && m.storyId) { activate(m.storyId); return }
+    showTip(m) // tap shows the same tip hover shows; an empty tap dismisses it
   },
   onMarkerHover(m) {
-    activeMarker = m
-    if (m) {
-      const lat = `${Math.abs(m.lat).toFixed(2)}° ${m.lat >= 0 ? 'N' : 'S'}`
-      const lng = `${Math.abs(m.lng).toFixed(2)}° ${m.lng >= 0 ? 'E' : 'W'}`
-      const label = m.kind === 'story' ? 'FIELD STUDY — CLICK TO OPEN' : m.kind === 'poi' ? 'ON RECORD' : 'DATA STATION'
-      tipEl.innerHTML = `<div class="tip-label">${label}</div><div class="tip-body">${m.label}${m.note ? `<br><span style="color: var(--ink-mid); font-size: 12px">${m.note}</span>` : ''}</div><div class="tip-coords">${lat}, ${lng}</div>`
-      tipEl.classList.add('on')
-      trackTip()
-    } else {
-      tipEl.classList.remove('on')
-      cancelAnimationFrame(tipRaf)
-    }
+    showTip(m)
   },
 })
+
+function showTip(m) {
+  activeMarker = m
+  if (m) {
+    const lat = `${Math.abs(m.lat).toFixed(2)}° ${m.lat >= 0 ? 'N' : 'S'}`
+    const lng = `${Math.abs(m.lng).toFixed(2)}° ${m.lng >= 0 ? 'E' : 'W'}`
+    const label = m.kind === 'story' ? 'FIELD STUDY — CLICK TO OPEN' : m.kind === 'poi' ? 'ON RECORD' : 'DATA STATION'
+    tipEl.innerHTML = `<div class="tip-label">${label}</div><div class="tip-body">${m.label}${m.note ? `<br><span style="color: var(--ink-mid); font-size: 12px">${m.note}</span>` : ''}</div><div class="tip-coords">${lat}, ${lng}</div>`
+    tipEl.classList.add('on')
+    trackTip()
+  } else {
+    tipEl.classList.remove('on')
+    cancelAnimationFrame(tipRaf)
+  }
+}
 if (import.meta.env.DEV) window.__globe = globe
 
 /* ---------- activation: one entry point for every visualization ---------- */
 const legendEl = document.getElementById('density-legend')
 const dividerEl = document.getElementById('compare-divider')
+const cmpExit = document.getElementById('cmp-exit')
+cmpExit.hidden = true // lives outside the divider so it hides on its own
 const cmpLabelA = document.getElementById('cmp-label-a')
 const cmpLabelB = document.getElementById('cmp-label-b')
 let compare = null // { a, b } while compare mode is active
@@ -273,6 +289,7 @@ function startCompare(a, b) {
     x,
   )
   dividerEl.hidden = false
+  cmpExit.hidden = false
   dividerEl.style.left = '50%'
   cmpLabelA.textContent = `◀ ${a.title}`
   cmpLabelB.textContent = `${b.title} ▶`
@@ -288,6 +305,7 @@ function exitCompare(silent = false) {
   const keep = compare.a.id
   compare = null
   dividerEl.hidden = true
+  cmpExit.hidden = true
   if (!silent) activate(keep)
 }
 
@@ -413,7 +431,10 @@ function buildCatalog(filter = '') {
       row.className = 'cat-row'
       row.dataset.id = entry.id
       row.classList.toggle('active', entry.id === (activeStory || activeId))
-      row.innerHTML = `<span class="cat-title">${entry.title}</span><span class="mono cat-meta">${entry.freshness || entry.source}</span>`
+      // A viewer scanning 583 rows must be able to tell a journey from a
+      // sighting map: TRACKS = drawn routes, RECORDS = occurrence density.
+      const type = entry.kind === 'story' ? 'STORY' : entry.kind === 'base' ? 'TRACKS' : entry.source === 'GBIF' ? 'RECORDS' : entry.source === 'NASA' ? 'SATELLITE' : 'LAYER'
+      row.innerHTML = `<span class="cat-title">${entry.title}</span><span class="mono cat-meta"><span class="cat-tag" data-type="${type.toLowerCase()}">${type}</span>${entry.freshness || entry.source}</span>`
       row.addEventListener('click', () => {
         if (picking) {
           if (entry.kind !== 'overlay') {
@@ -440,7 +461,7 @@ function toggleCatalog(force) {
   if (explore) explore.setAttribute('aria-expanded', String(open))
   if (open) {
     buildCatalog(catalogSearch.value)
-    catalogSearch.focus()
+    if (!COARSE) catalogSearch.focus() // autofocus pops the software keyboard over the drawer on phones
   }
 }
 document.getElementById('catalog-close').addEventListener('click', () => toggleCatalog(false))

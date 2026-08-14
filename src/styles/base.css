@@ -219,6 +219,9 @@ a { color: var(--green-bright); text-decoration: none; }
   color: var(--ink-mid);
   white-space: nowrap;
 }
+@media (max-width: 560px) {
+  .divider .label { white-space: normal; text-align: center; max-width: 62vw; font-size: 10px; line-height: 1.5; }
+}
 
 /* --- Map tooltip --- */
 .map-tip {

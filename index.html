@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Waypoints — The Natural World, Made Visible</title>
   <meta name="description" content="A living globe of the natural world — real satellite imagery, species occurrence data, tracked migrations, and habitat layers, drawn from GBIF, NASA, USGS, and a century of field records." />
   <meta property="og:title" content="Waypoints — The Natural World, Made Visible" />
@@ -66,7 +66,7 @@
       <div class="layer-bar" data-reveal>
         <div class="layer-chips" id="layer-chips" role="group" aria-label="Globe data layers"></div>
         <div class="caption-row">
-          <p class="mono layer-caption" id="layer-caption">Tracked migrations on record — three woodcock GPS tracks + the Red Desert–Hoback mule deer corridor · drag to rotate · ⌘+scroll / dbl-click to zoom</p>
+          <p class="mono layer-caption" id="layer-caption">Tracked migrations on record — three woodcock GPS tracks + the Red Desert–Hoback mule deer corridor · drag to rotate</p>
           <button class="mono share-btn" id="share-btn" title="Copy a link to this view">⧉ SHARE</button>
         </div>
         <div class="density-legend mono" id="density-legend" hidden aria-label="Density scale">
@@ -82,8 +82,8 @@
         <button class="divider-handle mono" aria-label="Drag to compare">⇄</button>
         <span class="mono cmp-label cmp-label-a" id="cmp-label-a"></span>
         <span class="mono cmp-label cmp-label-b" id="cmp-label-b"></span>
-        <button class="panel-close mono cmp-exit" id="cmp-exit" aria-label="Exit compare">✕ COMPARE</button>
       </div>
+      <button class="panel-close mono cmp-exit" id="cmp-exit" aria-label="Exit compare" hidden>✕ COMPARE</button>
 
       <div class="story-hud" id="story-hud" hidden>
         <div class="hud-head">
@@ -113,7 +113,7 @@
         </div>
         <input class="catalog-search mono" id="catalog-search" type="search" placeholder="SEARCH LAYERS + STUDIES…" aria-label="Search visualizations" />
         <div class="catalog-list" id="catalog-list" data-lenis-prevent></div>
-        <p class="mono catalog-foot">EVERY LAYER TRACES TO ITS SOURCE · REFETCHED FROM GBIF + NASA ON EACH BUILD</p>
+        <p class="mono catalog-foot">EVERY LAYER TRACES TO ITS SOURCE · GBIF + NASA DATA PULLED AUG 2026</p>
       </aside>
 
 <!-- story content lives in the reader below the map -->
@@ -142,7 +142,7 @@
         <article class="reader-body" id="reader-woodcock" hidden>
           <p class="kicker">N°02 — American woodcock · Field notes</p>
           <h2 class="display">Gone by morning.</h2>
-          <p class="reader-deck">Woodcock migrate alone, at night, barely above the treetops. The three birds crossing the map are flying real GPS-style tracks.</p>
+          <p class="reader-deck">Woodcock migrate alone, at night, barely above the treetops. The three birds crossing the map fly routes modeled on real GPS telemetry.</p>
           <div class="reader-cols">
             <p>Woodcock don't migrate in flocks. Each bird lifts off at dusk, alone, flies a few dark hours low over the trees, and drops into thick young forest before dawn. For most of history that made the migration invisible: the birds were here, then they weren't.</p>
             <p>Since 2017, researchers have fitted hundreds of woodcock with GPS transmitters lighter than a nickel, and the route finally has a shape — hops of 20 to 150 miles, long stopovers in river-bottom cover, a chain of habitat running from Canada to the Gulf. Lose a link and the chain breaks. Hover any stopover on the map to see the date and the cover the bird chose.</p>
@@ -199,12 +199,12 @@
       <div class="container">
         <p class="kicker" data-reveal>Coverage</p>
         <h2 class="display section-title" id="pillars-title" data-reveal>Five ways to read the same country.</h2>
-        <p class="section-intro" data-reveal>Everything filed under five headings. Same woods, same water — different questions.</p>
+        <p class="section-intro" data-reveal>Five kinds of question we build maps for. Tracked movement and occurrence records are on the globe today; the rest is where this is headed. Same woods, same water — different questions.</p>
         <div class="pillar-grid" data-reveal-group>
           <div class="plate pillar" data-reveal>
             <p class="plate-marginalia">01</p>
             <h3>Migration &amp; Movement</h3>
-            <p>Where animals go and when they decide to move. A teal that leaves Manitoba in September is a story with a route, a timeline, and a destination — the maps draw the whole thing.</p>
+            <p>Where animals go and when they move. On the globe today: four tracked routes — three woodcock fall migrations modeled on EWMRC GPS telemetry, and the Red Desert–Hoback mule deer corridor from published collar research. Every other species layer is occurrence density: where a species has been recorded, not the path it took.</p>
           </div>
           <div class="plate pillar" data-reveal>
             <p class="plate-marginalia">02</p>
@@ -232,7 +232,7 @@
 
     <div class="divider" aria-hidden="true">
       <div class="lines"><i></i><i></i><i></i></div>
-      <span class="label">45.64° N, 121.94° W — BONNEVILLE DAM FISH COUNTS</span>
+      <span class="label">38.98° N, 74.92° W — CAPE MAY STOPOVER, WOODCOCK TRACK 01</span>
       <div class="lines"><i></i><i></i><i></i></div>
     </div>
 
@@ -242,17 +242,21 @@
         <p class="kicker" data-reveal>Sources</p>
         <h2 class="display section-title" id="sources-title" data-reveal>Where the numbers come from.</h2>
         <p class="section-intro" data-reveal>Every layer on this site is drawn from public, citable data — the same sources researchers use. If a number is on the globe, you can trace it back to the agency that measured it.</p>
+        <p class="kicker" data-reveal>On the globe now</p>
         <dl class="source-ledger" data-reveal-group>
-          <div class="source" data-reveal><dt>GBIF</dt><dd>Three billion occurrence records, queryable live — the black bear layer is drawn straight from its API.</dd></div>
-          <div class="source" data-reveal><dt>NASA Earth Observations</dt><dd>The globe itself: Blue Marble surface, Black Marble night lights, and monthly MODIS vegetation.</dd></div>
-          <div class="source" data-reveal><dt>Movebank</dt><dd>Animal tracking data from research teams worldwide — the raw material of every movement map.</dd></div>
-          <div class="source" data-reveal><dt>Eastern Woodcock Migration Research Cooperative</dt><dd>Satellite-tagged woodcock from New Brunswick to the Gulf, tracked through the full annual cycle since 2017.</dd></div>
+          <div class="source" data-reveal><dt>GBIF</dt><dd>Three billion occurrence records, queryable live — every species density layer is drawn straight from its API.</dd></div>
+          <div class="source" data-reveal><dt>NASA Earth Observations</dt><dd>The globe itself: Blue Marble surface, Black Marble night lights, and monthly MODIS environmental layers.</dd></div>
+          <div class="source" data-reveal><dt>Eastern Woodcock Migration Research Cooperative</dt><dd>Satellite-tagged woodcock from New Brunswick to the Gulf since 2017 — the telemetry our three fall tracks are modeled on.</dd></div>
+          <div class="source" data-reveal><dt>Schorger passenger pigeon database</dt><dd>622 georeferenced records of the passenger pigeon's decline, compiled from historical accounts.</dd></div>
+          <div class="source" data-reveal><dt>Western Migrations / Wyoming Game &amp; Fish</dt><dd>Corridor data from the researchers who proved a migration map could move policy.</dd></div>
+        </dl>
+        <p class="kicker" data-reveal>What we build from next</p>
+        <dl class="source-ledger" data-reveal-group>
+          <div class="source" data-reveal><dt>Movebank</dt><dd>Animal tracking data from research teams worldwide — the raw material of the movement maps to come.</dd></div>
           <div class="source" data-reveal><dt>USGS Bird Banding Laboratory</dt><dd>Band recoveries going back a century — origin-to-destination pairs, one row at a time.</dd></div>
           <div class="source" data-reveal><dt>USGS National Water Information System</dt><dd>Stream gauges logging temperature and flow every 15 minutes, decade after decade.</dd></div>
           <div class="source" data-reveal><dt>eBird / Cornell Lab of Ornithology</dt><dd>Hundreds of millions of checklists — the backbone of modern range and abundance maps.</dd></div>
           <div class="source" data-reveal><dt>State fish &amp; wildlife agencies</dt><dd>Harvest surveys by county, species, and season, across the Great Lakes states and beyond.</dd></div>
-          <div class="source" data-reveal><dt>Schorger passenger pigeon database</dt><dd>622 georeferenced records of the passenger pigeon's decline, compiled from historical accounts.</dd></div>
-          <div class="source" data-reveal><dt>Western Migrations / Wyoming Game &amp; Fish</dt><dd>Corridor data from the researchers who proved a migration map could move policy.</dd></div>
         </dl>
 
         <div class="attribution" data-reveal>
@@ -269,7 +273,7 @@
 
     <div class="divider" aria-hidden="true">
       <div class="lines"><i></i><i></i><i></i></div>
-      <span class="label">50.17° N, 98.32° W — DELTA MARSH STATION, MAN.</span>
+      <span class="label">39.14° N, 84.51° W — CINCINNATI ZOO, LAST PASSENGER PIGEON, 1914</span>
       <div class="lines"><i></i><i></i><i></i></div>
     </div>
 

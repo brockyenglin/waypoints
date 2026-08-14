@@ -4578,7 +4578,7 @@
   {
     "id": "amur-falcon",
     "title": "Amur falcon",
-    "category": "Legendary migrants",
+    "category": "Long-distance birds",
     "kind": "overlay",
     "texture": "textures/layer-amur-falcon.png",
     "opacity": 1,
@@ -4589,7 +4589,7 @@
   {
     "id": "arctic-tern",
     "title": "Arctic tern",
-    "category": "Legendary migrants",
+    "category": "Long-distance birds",
     "kind": "overlay",
     "texture": "textures/layer-arctic-tern.png",
     "opacity": 1,
@@ -4600,7 +4600,7 @@
   {
     "id": "godwit",
     "title": "Bar-tailed godwit",
-    "category": "Legendary migrants",
+    "category": "Long-distance birds",
     "kind": "overlay",
     "texture": "textures/layer-godwit.png",
     "opacity": 1,
@@ -4611,7 +4611,7 @@
   {
     "id": "common-swift",
     "title": "Common swift",
-    "category": "Legendary migrants",
+    "category": "Long-distance birds",
     "kind": "overlay",
     "texture": "textures/layer-common-swift.png",
     "opacity": 1,
@@ -4622,7 +4622,7 @@
   {
     "id": "red-knot",
     "title": "Red knot",
-    "category": "Legendary migrants",
+    "category": "Long-distance birds",
     "kind": "overlay",
     "texture": "textures/layer-red-knot.png",
     "opacity": 1,
@@ -4633,7 +4633,7 @@
   {
     "id": "sooty-shearwater",
     "title": "Sooty shearwater",
-    "category": "Legendary migrants",
+    "category": "Long-distance birds",
     "kind": "overlay",
     "texture": "textures/layer-sooty-shearwater.png",
     "opacity": 1,
@@ -4644,7 +4644,7 @@
   {
     "id": "swainsons-hawk",
     "title": "Swainson's hawk",
-    "category": "Legendary migrants",
+    "category": "Long-distance birds",
     "kind": "overlay",
     "texture": "textures/layer-swainsons-hawk.png",
     "opacity": 1,
@@ -4655,7 +4655,7 @@
   {
     "id": "wandering-albatross",
     "title": "Wandering albatross",
-    "category": "Legendary migrants",
+    "category": "Long-distance birds",
     "kind": "overlay",
     "texture": "textures/layer-wandering-albatross.png",
     "opacity": 1,
