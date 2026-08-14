@@ -13,6 +13,11 @@ import { composeCard } from './lib/card.mjs'
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const ORIGIN = process.env.SITE_ORIGIN || 'https://brockyenglin.github.io/waypoints'
 const layers = JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'layers.json'), 'utf8'))
+// Cards mirror the site's default view: since-2000 texture where one exists.
+const modern = new Set(JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'modern.json'), 'utf8')))
+const defaultView = (l) => modern.has(l.id)
+  ? { ...l, texture: l.texture.replace(/\.png$/, '-modern.png'), caption: (l.caption || '').replace('all-time occurrence records', 'occurrence records 2000–2026') }
+  : l
 
 const STORIES = [
   { id: 'muledeer', title: '150 miles, twice a year', caption: 'The Red Desert-to-Hoback mule deer migration · Wyoming Migration Initiative / USGS' },
@@ -55,7 +60,8 @@ let n = 0
 // Default card (no layer drape — the bare living earth)
 await composeCard({ entry: null, out: path.join(ogDir, 'default.jpg'), width: 1200, height: 630, layout: 'og' })
 
-for (const l of layers) {
+for (const raw of layers) {
+  const l = defaultView(raw)
   await composeCard({ entry: l, out: path.join(ogDir, `${l.id}.jpg`), width: 1200, height: 630, layout: 'og' })
   const dir = path.join(root, 'public', 'l', l.id)
   fs.mkdirSync(dir, { recursive: true })

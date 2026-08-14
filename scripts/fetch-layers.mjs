@@ -633,52 +633,74 @@ const fetchBuf = async (url) => {
 }
 
 const SKIP_EXISTING = process.argv.includes('--skip-existing')
+const ONLY = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean)
+
+// Wild-occurrence records only: fossils, paleo-database citations, and living
+// zoo inventories otherwise put grizzly dots in Ohio.
+const BASIS = ['HUMAN_OBSERVATION', 'OBSERVATION', 'MACHINE_OBSERVATION', 'PRESERVED_SPECIMEN', 'MATERIAL_SAMPLE', 'OCCURRENCE']
+  .map((b) => `basisOfRecord=${b}`).join('&')
+const MODERN_YEARS = '2000,2026'
+// Melt the square density pixels into soft organic clusters; the alpha gain
+// restores the punch the blur spreads out. Ramp colors survive untouched.
+const SMOOTH = { sigma: 1.6, gain: 3 }
+
+async function densityTexture({ key, filters, file }) {
+  const Z = 1, COLS = 4, ROWS = 2, T = 1024
+  const tiles = await Promise.all(
+    Array.from({ length: COLS * ROWS }, (_, i) => {
+      const x = i % COLS, y = Math.floor(i / COLS)
+      const url = `https://api.gbif.org/v2/map/occurrence/density/${Z}/${x}/${y}@2x.png?srs=EPSG%3A4326&taxonKey=${key}&style=classic.point&${BASIS}${filters ? '&' + filters : ''}`
+      return fetchBuf(url).then((buf) => ({ x, y, buf })).catch(() => null)
+    }),
+  )
+  const composite = tiles.filter((t) => t && t.buf.length > 0)
+    .map(({ x, y, buf }) => ({ input: buf, left: x * T, top: y * T }))
+  if (!composite.length) return false
+  const flat = await sharp({ create: { width: COLS * T, height: ROWS * T, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite(composite)
+    .blur(SMOOTH.sigma)
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+  const { data, info } = flat
+  for (let i = 3; i < data.length; i += 4) data[i] = Math.min(255, data[i] * SMOOTH.gain)
+  await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+    .png()
+    .toFile(path.join(dest, file))
+  return true
+}
+
+const modernIds = []
 
 async function speciesLayer({ id, name, title, category }) {
   const match = await (await fetch(`https://api.gbif.org/v1/species/match?name=${encodeURIComponent(name)}`)).json()
   const key = match.usageKey
   if (!key) throw new Error(`GBIF match failed for ${name}`)
 
-  // Incremental mode: texture already on disk — refresh the registry row only.
-  const file0 = `layer-${id}.png`
-  if (SKIP_EXISTING && fs.existsSync(path.join(dest, file0))) {
-    return {
-      id, title, category,
-      kind: 'overlay',
-      texture: `textures/${file0}`,
-      opacity: 1,
-      caption: `${title} — all-time occurrence records · GBIF · pulled ${STAMP} · ${match.scientificName}`,
-      freshness: `GBIF · ${STAMP.toUpperCase()}`,
-      source: 'GBIF',
-    }
-  }
-
-  const Z = 1, COLS = 4, ROWS = 2, T = 1024
-  const tiles = await Promise.all(
-    Array.from({ length: COLS * ROWS }, (_, i) => {
-      const x = i % COLS, y = Math.floor(i / COLS)
-      const url = `https://api.gbif.org/v2/map/occurrence/density/${Z}/${x}/${y}@2x.png?srs=EPSG%3A4326&taxonKey=${key}&style=classic.point`
-      return fetchBuf(url).then((buf) => ({ x, y, buf })).catch(() => null)
-    }),
-  )
-  const composite = tiles.filter((t) => t && t.buf.length > 0)
-    .map(({ x, y, buf }) => ({ input: buf, left: x * T, top: y * T }))
-  if (!composite.length) throw new Error(`no data tiles for ${name}`)
-  const file = `layer-${id}.png`
-  await sharp({ create: { width: COLS * T, height: ROWS * T, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
-    .composite(composite)
-    .png()
-    .toFile(path.join(dest, file))
-  console.log(`✓ ${title} (${match.scientificName}, taxonKey ${key})`)
-  return {
+  const entry = {
     id, title, category,
     kind: 'overlay',
-    texture: `textures/${file}`,
+    texture: `textures/layer-${id}.png`,
     opacity: 1,
     caption: `${title} — all-time occurrence records · GBIF · pulled ${STAMP} · ${match.scientificName}`,
     freshness: `GBIF · ${STAMP.toUpperCase()}`,
     source: 'GBIF',
   }
+  const modernFile = `layer-${id}-modern.png`
+  const wantsModern = category !== 'Historical' // extinct species: "since 2000" would be an empty planet
+
+  // Incremental mode: smoothed textures already on disk (the -modern file marks
+  // the new pipeline) — refresh the registry row only.
+  if (SKIP_EXISTING && fs.existsSync(path.join(dest, modernFile))) {
+    modernIds.push(id)
+    return entry
+  }
+  if (SKIP_EXISTING && !wantsModern && fs.existsSync(path.join(dest, `layer-${id}.png`))) return entry
+
+  const gotAll = await densityTexture({ key, filters: '', file: `layer-${id}.png` })
+  if (!gotAll) throw new Error(`no data tiles for ${name}`)
+  if (wantsModern && await densityTexture({ key, filters: `year=${MODERN_YEARS}`, file: modernFile })) modernIds.push(id)
+  console.log(`✓ ${title} (${match.scientificName}, taxonKey ${key})`)
+  return entry
 }
 
 async function neoLayer({ id, dataset, title, category, caption }) {
@@ -707,7 +729,8 @@ async function neoLayer({ id, dataset, title, category, caption }) {
 }
 
 // Batched: max 6 concurrent jobs so GBIF/NEO see a polite client.
-const jobs = [...SPECIES.map((sp) => () => speciesLayer(sp)), ...NEO.map((n) => () => neoLayer(n))]
+const roster = ONLY.length ? SPECIES.filter((sp) => ONLY.includes(sp.id)) : SPECIES
+const jobs = [...roster.map((sp) => () => speciesLayer(sp)), ...(ONLY.length ? [] : NEO.map((n) => () => neoLayer(n)))]
 const layers = []
 for (let i = 0; i < jobs.length; i += 6) {
   const results = await Promise.allSettled(jobs.slice(i, i + 6).map((j) => j()))
@@ -720,5 +743,11 @@ for (let i = 0; i < jobs.length; i += 6) {
 // Keep the drawer tidy: stable category order, alphabetical within.
 const CAT_ORDER = ['Big game', 'Waterfowl', 'Upland birds', 'Raptors', 'Fish', 'Furbearers & small game', 'Reptiles & amphibians', 'Birds & icons', 'Bears of the world', 'Africa', 'Asia', 'Europe', 'South & Central America', 'Australia & Oceania', 'Arctic & Antarctic', 'Ocean giants', 'Long-distance birds', 'Songbirds', 'Waterbirds & shorebirds', 'Saltwater', 'Insects & pollinators', 'Small mammals & primates', 'Historical', 'Habitat', 'Conditions', 'Ocean']
 layers.sort((a, b) => (CAT_ORDER.indexOf(a.category) - CAT_ORDER.indexOf(b.category)) || a.title.localeCompare(b.title))
-fs.writeFileSync(path.join(root, 'src', 'data', 'layers.json'), JSON.stringify(layers, null, 2))
-console.log(`layers.json: ${layers.length} layers registered`)
+if (ONLY.length) {
+  console.log(`--only run: ${layers.length} layers refreshed, registry untouched, modern: ${modernIds.join(', ')}`)
+} else {
+  fs.writeFileSync(path.join(root, 'src', 'data', 'layers.json'), JSON.stringify(layers, null, 2))
+  modernIds.sort()
+  fs.writeFileSync(path.join(root, 'src', 'data', 'modern.json'), JSON.stringify(modernIds))
+  console.log(`layers.json: ${layers.length} layers registered · ${modernIds.length} with modern (2000+) variants`)
+}

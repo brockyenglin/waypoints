@@ -16,6 +16,9 @@ import pigeonData from './data/pigeon.json'
 // Dynamic import keeps the 579-row registry out of the code chunk: it loads
 // in parallel and the app chunk stays cache-stable across data refreshes.
 const layerRegistry = (await import('./data/layers.json')).default
+// Species with a second "since 2000" texture (year-filtered at fetch time).
+// Extinct species aren't in here — their only truth is the historical record.
+const MODERN = new Set((await import('./data/modern.json')).default)
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const BASE = import.meta.env.BASE_URL
@@ -240,8 +243,19 @@ const cmpLabelB = document.getElementById('cmp-label-b')
 let compare = null // { a, b } while compare mode is active
 let picking = false
 
+/* Era: 'modern' shows records since 2000 (the default — extirpated ranges and
+   century-old museum pins drop out); 'all' shows every wild record on file. */
+let era = 'modern'
+const hasModern = (entry) => entry && entry.source === 'GBIF' && MODERN.has(entry.id)
+const eraTexture = (entry) =>
+  era === 'modern' && hasModern(entry) ? entry.texture.replace(/\.png$/, '-modern.png') : entry.texture
+const eraCaption = (entry) =>
+  era === 'modern' && hasModern(entry)
+    ? (entry.caption || entry.title).replace('all-time occurrence records', 'occurrence records 2000–2026')
+    : entry.caption || entry.title
+
 function setCaption(entry) {
-  captionEl.textContent = entry.caption || entry.title
+  captionEl.textContent = eraCaption(entry)
 }
 
 function setLegend(visible) {
@@ -253,9 +267,11 @@ function syncURL() {
   url.searchParams.delete('layer')
   url.searchParams.delete('study')
   url.searchParams.delete('compare')
+  url.searchParams.delete('era')
   if (activeStory) url.searchParams.set('study', activeStory)
   else if (compare) url.searchParams.set('compare', `${compare.a.id},${compare.b.id}`)
   else if (activeId !== 'migrations') url.searchParams.set('layer', activeId)
+  if (era === 'all' && !activeStory) url.searchParams.set('era', 'all') // modern is the default
   history.replaceState(null, '', url)
 }
 
@@ -266,7 +282,7 @@ function activate(id) {
   if (compare) exitCompare(true)
   if (activeStory) closeStory(true)
   activeId = id
-  globe.setLayer(entry.kind === 'base' ? null : { texture: `${BASE}${entry.texture}`, opacity: entry.opacity })
+  globe.setLayer(entry.kind === 'base' ? null : { texture: `${BASE}${eraTexture(entry)}`, opacity: entry.opacity })
   setCaption(entry)
   setLegend(entry.source === 'GBIF')
   track('activate', id)
@@ -284,8 +300,8 @@ function startCompare(a, b) {
   catalog.hidden = true
   const x = stageWidth() / 2
   globe.setCompare(
-    { texture: `${BASE}${a.texture}`, opacity: a.opacity },
-    { texture: `${BASE}${b.texture}`, opacity: b.opacity },
+    { texture: `${BASE}${eraTexture(a)}`, opacity: a.opacity },
+    { texture: `${BASE}${eraTexture(b)}`, opacity: b.opacity },
     x,
   )
   dividerEl.hidden = false
@@ -293,7 +309,7 @@ function startCompare(a, b) {
   dividerEl.style.left = '50%'
   cmpLabelA.textContent = `◀ ${a.title}`
   cmpLabelB.textContent = `${b.title} ▶`
-  captionEl.textContent = `${a.caption} ⇄ ${b.caption}`.slice(0, 220)
+  captionEl.textContent = `${eraCaption(a)} ⇄ ${eraCaption(b)}`.slice(0, 220)
   setLegend(a.source === 'GBIF' || b.source === 'GBIF')
   track('compare', `${a.id},${b.id}`)
   syncURL()
@@ -379,11 +395,53 @@ function syncUI() {
     row.classList.toggle('active', row.dataset.id === (activeStory || activeId))
   }
   indexItems.forEach((b) => b.classList.toggle('active', b.dataset.story === activeStory))
+  const toggle = document.getElementById('era-toggle')
+  if (toggle) {
+    const applicable = compare
+      ? hasModern(compare.a) || hasModern(compare.b)
+      : !activeStory && hasModern(byId[activeId])
+    toggle.hidden = !applicable
+    for (const b of toggle.querySelectorAll('.chip-era')) {
+      b.setAttribute('aria-pressed', String(b.dataset.era === era))
+    }
+  }
+}
+
+/* ---------- era toggle: since-2000 vs all-time records ---------- */
+function setEra(next) {
+  if (era === next) return
+  era = next
+  track('era', `${next}:${activeId}`)
+  if (compare) {
+    // Re-resolve both sides under the new era without resetting the divider.
+    const keep = compare
+    compare = null
+    startCompare(keep.a, keep.b)
+    return
+  }
+  activate(activeId)
+}
+
+function eraChips() {
+  const wrap = document.createElement('span')
+  wrap.id = 'era-toggle'
+  wrap.setAttribute('role', 'group')
+  wrap.setAttribute('aria-label', 'Record era')
+  for (const [value, label] of [['modern', 'Since 2000'], ['all', 'All-time']]) {
+    const b = document.createElement('button')
+    b.className = 'chip chip-era'
+    b.dataset.era = value
+    b.textContent = label
+    b.addEventListener('click', () => setEra(value))
+    wrap.appendChild(b)
+  }
+  return wrap
 }
 
 /* ---------- featured chips + catalog ---------- */
 function buildChips() {
   chipsEl.innerHTML = ''
+  chipsEl.appendChild(eraChips())
   for (const entry of REGISTRY.filter((r) => r.featured)) {
     const b = document.createElement('button')
     b.className = 'chip'
@@ -572,12 +630,13 @@ buildChips()
 buildCatalog()
 refreshRegistryFromBackend()
 
-// Deep links: ?layer=<id> · ?study=<id> · ?compare=<a>,<b>
+// Deep links: ?layer=<id> · ?study=<id> · ?compare=<a>,<b> · ?era=all
 {
   const params = new URLSearchParams(location.search)
   const study = params.get('study')
   const layer = params.get('layer')
   const cmp = params.get('compare')
+  if (params.get('era') === 'all') era = 'all'
   if (study && byId[study]) openStory(study)
   else if (cmp) {
     const [a, b] = cmp.split(',').map((x) => byId[x])

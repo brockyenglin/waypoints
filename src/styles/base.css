@@ -140,6 +140,14 @@ a { color: var(--green-bright); text-decoration: none; }
 .chip:hover { border-color: var(--green); color: var(--ink-high); transition-duration: var(--t-bleed-in); }
 .chip[aria-pressed='true'] { border-color: var(--green-bright); color: var(--ink-high); background: var(--green-deep); }
 .chip[aria-pressed='true']::before { content: ''; width: 6px; height: 6px; background: var(--green-bright); transform: rotate(45deg); }
+
+/* Era toggle: a small segmented pair leading the chip row when the active
+   layer has a since-2000 variant. Dashed = a mode, not another layer. */
+#era-toggle { display: inline-flex; gap: 6px; align-items: center; padding-right: 10px; margin-right: 2px; border-right: 1px solid var(--ink-low); }
+#era-toggle[hidden] { display: none; }
+.chip-era { border-style: dashed; font-size: 9.5px; }
+.chip-era[aria-pressed='true'] { border-style: solid; background: var(--green-deep); color: var(--green-bright); }
+.chip-era[aria-pressed='true']::before { display: none; }
 .chip.flight[aria-pressed='true'] { border-color: var(--orange); background: #33170c; }
 .chip.flight[aria-pressed='true']::before { background: var(--orange); }
 

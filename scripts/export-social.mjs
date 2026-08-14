@@ -9,7 +9,12 @@ import { fileURLToPath } from 'node:url'
 import { composeCard } from './lib/card.mjs'
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
-const layers = JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'layers.json'), 'utf8'))
+const layersRaw = JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'layers.json'), 'utf8'))
+// Cards mirror the site's default view: since-2000 texture where one exists.
+const modern = new Set(JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'modern.json'), 'utf8')))
+const layers = layersRaw.map((l) => modern.has(l.id)
+  ? { ...l, texture: l.texture.replace(/\.png$/, '-modern.png'), caption: (l.caption || '').replace('all-time occurrence records', 'occurrence records 2000–2026') }
+  : l)
 const outDir = path.join(root, 'exports')
 fs.mkdirSync(outDir, { recursive: true })
 
