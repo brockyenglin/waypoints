@@ -454,7 +454,8 @@
   .story-index {
     top: auto;
     transform: none;
-    bottom: calc(114px + max(14px, env(safe-area-inset-bottom)));
+    /* Clears the layer-bar at its tallest: chips row + 2-line caption + wrapped density legend */
+    bottom: calc(146px + max(14px, env(safe-area-inset-bottom)));
     left: var(--gutter);
     right: var(--gutter);
     display: flex;
