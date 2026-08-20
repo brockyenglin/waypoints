@@ -240,8 +240,26 @@ function setCaption(entry) {
   captionEl.textContent = eraCaption(entry)
 }
 
-function setLegend(visible) {
-  legendEl.hidden = !visible
+const swatchEl = document.getElementById('swatch-legend')
+// GBIF layers get the density ramp; layers that declare their own legend
+// (e.g. roadless: orange = losing protection, green = state rules stand)
+// get color swatches — a reader should never need the caption to decode colors.
+function setLegend(entry) {
+  const gbif = !!entry && entry.source === 'GBIF'
+  legendEl.hidden = !gbif
+  const swatches = !gbif && entry && Array.isArray(entry.legend) && entry.legend.length ? entry.legend : null
+  swatchEl.hidden = !swatches
+  swatchEl.textContent = ''
+  if (swatches) {
+    for (const s of swatches) {
+      const dot = document.createElement('i')
+      dot.className = 'swatch'
+      dot.style.background = String(s.color)
+      const label = document.createElement('span')
+      label.textContent = String(s.label).toUpperCase()
+      swatchEl.append(dot, label)
+    }
+  }
 }
 
 function syncURL() {
@@ -264,7 +282,7 @@ function activate(id) {
   activeId = id
   globe.setLayer(entry.kind === 'base' ? null : { texture: `${BASE}${eraTexture(entry)}`, opacity: entry.opacity })
   setCaption(entry)
-  setLegend(entry.source === 'GBIF')
+  setLegend(entry)
   syncLiveDensity()
   track('activate', id)
   syncURL()
@@ -291,7 +309,7 @@ function startCompare(a, b) {
   cmpLabelA.textContent = `◀ ${a.title}`
   cmpLabelB.textContent = `${b.title} ▶`
   captionEl.textContent = `${eraCaption(a)} ⇄ ${eraCaption(b)}`.slice(0, 220)
-  setLegend(a.source === 'GBIF' || b.source === 'GBIF')
+  setLegend(a.source === 'GBIF' ? a : b.source === 'GBIF' ? b : null)
   track('compare', `${a.id},${b.id}`)
   syncURL()
   syncUI()
@@ -368,8 +386,11 @@ document.getElementById('share-btn').addEventListener('click', async () => {
 })
 
 function syncUI() {
-  for (const el of chipsEl.querySelectorAll('.chip[data-id]')) {
-    el.setAttribute('aria-pressed', String(el.dataset.id === activeId))
+  const here = document.getElementById('chip-active')
+  if (here) {
+    here.textContent = compare
+      ? `${compare.a.title} ⇄ ${compare.b.title}`
+      : (byId[activeId]?.title || 'Tracked migrations')
   }
   for (const row of catalogList.querySelectorAll('.cat-row')) {
     row.classList.toggle('active', row.dataset.id === activeId)
@@ -417,19 +438,18 @@ function eraChips() {
   return wrap
 }
 
-/* ---------- featured chips + catalog ---------- */
+/* ---------- chip row: what you're looking at + the controls ---------- */
 function buildChips() {
   chipsEl.innerHTML = ''
   chipsEl.appendChild(eraChips())
-  for (const entry of REGISTRY.filter((r) => r.featured)) {
-    const b = document.createElement('button')
-    b.className = 'chip'
-    b.dataset.id = entry.id
-    b.setAttribute('aria-pressed', String(entry.id === activeId))
-    b.textContent = entry.title
-    b.addEventListener('click', () => activate(entry.id))
-    chipsEl.appendChild(b)
-  }
+  // One chip for the active view — the catalog is where you switch, the chip
+  // row tells you where you are.
+  const here = document.createElement('button')
+  here.className = 'chip'
+  here.id = 'chip-active'
+  here.setAttribute('aria-pressed', 'true')
+  here.addEventListener('click', () => toggleCatalog())
+  chipsEl.appendChild(here)
   const cmp = document.createElement('button')
   cmp.className = 'chip'
   cmp.id = 'chip-compare'
@@ -443,6 +463,7 @@ function buildChips() {
   explore.setAttribute('aria-expanded', 'false')
   explore.addEventListener('click', () => toggleCatalog())
   chipsEl.appendChild(explore)
+  syncUI()
 }
 
 function buildCatalog(filter = '') {

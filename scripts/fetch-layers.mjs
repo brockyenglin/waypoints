@@ -752,6 +752,7 @@ const EXTRA_LAYERS = [
     caption: 'Inventoried roadless areas — 2001 Roadless Rule rescission proposed Aug 18, 2026. Orange: ~45M acres would lose protection · green: Idaho & Colorado state rules stand · USFS',
     freshness: 'USFS · AUG 2026', source: 'USFS', featured: true,
     cardRegion: { lngW: -170, lngE: -60, latN: 71, latS: 14 },
+    legend: [{ color: '#E8622C', label: 'Would lose protection' }, { color: '#5CBB6C', label: 'State rules stand' }],
   },
 ]
 layers.push(...EXTRA_LAYERS.filter((x) => !ONLY.length))

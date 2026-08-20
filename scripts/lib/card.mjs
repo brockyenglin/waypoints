@@ -81,9 +81,10 @@ function legendRow(y, isGBIF, width) {
   return `<text x="56" y="${y}" font-family="${MONO}" font-size="16" letter-spacing="2" fill="${MID}">THE NATURAL WORLD, MADE VISIBLE</text>`
 }
 
-function wordmark(x, y) {
-  return `<text x="${x}" y="${y}" font-size="30" font-weight="700" fill="${INK}">Waypoints</text>
-  <rect x="${x + 156}" y="${y - 20}" width="11" height="11" fill="${ORANGE}" transform="rotate(45 ${x + 161.5} ${y - 14.5})"/>`
+// The real lockup (white version) composites over the finished card.
+const LOGO = path.join(root, 'public', 'brand', 'wordmark-white-96.png')
+async function logoLayer(height, left, top) {
+  return { input: await sharp(LOGO).resize({ height }).png().toBuffer(), left, top }
 }
 
 export async function composeCard({ entry, out, width, height, layout }) {
@@ -108,7 +109,6 @@ export async function composeCard({ entry, out, width, height, layout }) {
     svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
   <defs>${RAMP}</defs>
   <g font-family="${FONT}">
-    ${wordmark(56, 96)}
     ${titleLines.map((l, i) => `<text x="56" y="${208 + i * (titleSize + 10)}" font-size="${titleSize}" font-weight="700" fill="${INK}">${esc(l)}</text>`).join('')}
     <text x="56" y="${srcY}" font-family="${MONO}" font-size="24" letter-spacing="2" fill="${GREEN}">${esc(source)}</text>
     ${sci ? `<text x="56" y="${srcY + 40}" font-family="${MONO}" font-size="22" fill="${MID}">${esc(sci)}</text>` : ''}
@@ -133,7 +133,6 @@ export async function composeCard({ entry, out, width, height, layout }) {
   </linearGradient></defs>
   <rect x="0" y="${height - 290}" width="${width}" height="290" fill="url(#fade)"/>
   <g font-family="${FONT}">
-    ${wordmark(56, 64)}
     ${titleLines.map((l, i) => `<text x="56" y="${baseY + i * (titleSize + 8)}" font-size="${titleSize}" font-weight="700" fill="${INK}">${esc(l)}</text>`).join('')}
     <text x="56" y="${baseY + (titleLines.length - 1) * (titleSize + 8) + 44}" font-family="${MONO}" font-size="20" letter-spacing="2" fill="${GREEN}">${esc(source)}</text>
     ${sci ? `<text x="56" y="${baseY + (titleLines.length - 1) * (titleSize + 8) + 78}" font-family="${MONO}" font-size="18" fill="${MID}">${esc(sci)}</text>` : ''}
@@ -146,6 +145,7 @@ export async function composeCard({ entry, out, width, height, layout }) {
     .composite([
       { input: stripBuf, left: 0, top: stripTop },
       { input: Buffer.from(svg), left: 0, top: 0 },
+      await logoLayer(layout === 'ig' ? 32 : 26, 56, layout === 'ig' ? 62 : 40),
     ])
     .jpeg({ quality: 72, mozjpeg: true })
     .toFile(out)

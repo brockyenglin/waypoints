@@ -6098,7 +6098,17 @@
       "lngE": -60,
       "latN": 71,
       "latS": 14
-    }
+    },
+    "legend": [
+      {
+        "color": "#E8622C",
+        "label": "Would lose protection"
+      },
+      {
+        "color": "#5CBB6C",
+        "label": "State rules stand"
+      }
+    ]
   },
   {
     "id": "aurochs",

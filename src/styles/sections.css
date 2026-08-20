@@ -20,14 +20,11 @@
   border-bottom: 1px solid color-mix(in srgb, var(--ink-low) 60%, transparent);
 }
 .wordmark {
-  font-size: 21px;
-  color: var(--ink-high);
   display: inline-flex;
-  align-items: baseline;
-  gap: 7px;
-  letter-spacing: -0.01em;
+  align-items: center;
 }
-.wordmark .wp { width: 7px; height: 7px; }
+.wordmark-img { height: 25px; display: block; }
+.wordmark-img-lg { height: 32px; }
 .masthead-links { display: flex; gap: 26px; }
 .masthead-links a {
   font-family: var(--font-mono);
@@ -54,7 +51,7 @@
 @media (max-width: 980px) { .live-badge { display: none; } }
 @media (max-width: 560px) { .masthead { gap: 12px; } .masthead-links { gap: 16px; } }
 @media (max-width: 430px) {
-  .wordmark { font-size: 18px; }
+  .wordmark-img { height: 21px; }
   .masthead-links { gap: 12px; }
   .masthead-links a { font-size: 10.5px; letter-spacing: 0.06em; }
 }
@@ -68,6 +65,18 @@
 }
 .globe-stage { position: absolute; inset: 0; }
 .globe-stage canvas { width: 100%; height: 100%; }
+/* Bottom scrim: the chrome must stay readable over bright terrain at zoom. */
+.atlas::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 220px;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(11, 15, 12, 0.5) 52%, rgba(11, 15, 12, 0.85));
+}
 
 .atlas-intro {
   position: absolute;
@@ -140,6 +149,7 @@
   padding: 10px 0;
   cursor: pointer;
   text-align: right;
+  text-decoration: none;
   border-bottom: 1px solid transparent;
 }
 .index-item .index-no {
@@ -190,10 +200,11 @@
 .layer-chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .caption-row { display: flex; align-items: center; gap: 14px; }
 .layer-caption {
-  color: var(--ink-mid);
+  color: color-mix(in srgb, var(--ink-high) 78%, var(--ink-mid));
   font-size: 10.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
 }
 .share-btn {
   flex: none;
@@ -226,6 +237,26 @@
   background: linear-gradient(90deg, #fdf7a1, #fdc84a, #f4772c, #c22a12);
 }
 .legend-note { margin-left: 8px; opacity: 0.7; }
+
+/* Swatch legend for layers that declare their own colors (entry.legend) */
+.swatch-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  color: color-mix(in srgb, var(--ink-high) 72%, var(--ink-mid));
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+}
+.swatch-legend .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+.swatch-legend span { margin-right: 10px; }
 
 /* Compare divider */
 .compare-divider {
@@ -647,7 +678,7 @@ section { position: relative; padding: clamp(40px, 7vw, 90px) 0; }
   padding: 42px 0 56px;
 }
 .colophon-grid { display: grid; grid-template-columns: 1.4fr 1.2fr 1fr; gap: 34px; }
-.colophon .wordmark { font-size: 24px; }
+
 .colophon-line { margin-top: 12px; color: var(--ink-mid); font-size: 14.5px; max-width: 38ch; }
 .colophon-meta { display: grid; gap: 8px; align-content: start; color: var(--ink-mid); font-size: 10.5px; letter-spacing: 0.05em; }
 .colophon-meta p { line-height: 1.6; }
