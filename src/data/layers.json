@@ -6083,6 +6083,24 @@
     "source": "GBIF"
   },
   {
+    "id": "roadless",
+    "title": "Roadless forest areas",
+    "category": "Public lands",
+    "kind": "overlay",
+    "texture": "textures/layer-roadless.png",
+    "opacity": 0.95,
+    "caption": "Inventoried roadless areas — 2001 Roadless Rule rescission proposed Aug 18, 2026. Orange: ~45M acres would lose protection · green: Idaho & Colorado state rules stand · USFS",
+    "freshness": "USFS · AUG 2026",
+    "source": "USFS",
+    "featured": true,
+    "cardRegion": {
+      "lngW": -170,
+      "lngE": -60,
+      "latN": 71,
+      "latS": 14
+    }
+  },
+  {
     "id": "aurochs",
     "title": "Aurochs (museum records)",
     "category": "Historical",

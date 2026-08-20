@@ -741,7 +741,20 @@ for (let i = 0; i < jobs.length; i += 6) {
   console.log(`— batch done (${Math.min(i + 6, jobs.length)}/${jobs.length})`)
 }
 // Keep the drawer tidy: stable category order, alphabetical within.
-const CAT_ORDER = ['Big game', 'Waterfowl', 'Upland birds', 'Raptors', 'Fish', 'Furbearers & small game', 'Reptiles & amphibians', 'Birds & icons', 'Bears of the world', 'Africa', 'Asia', 'Europe', 'South & Central America', 'Australia & Oceania', 'Arctic & Antarctic', 'Ocean giants', 'Long-distance birds', 'Songbirds', 'Waterbirds & shorebirds', 'Saltwater', 'Insects & pollinators', 'Small mammals & primates', 'Historical', 'Habitat', 'Conditions', 'Ocean']
+const CAT_ORDER = ['Big game', 'Waterfowl', 'Upland birds', 'Raptors', 'Fish', 'Furbearers & small game', 'Reptiles & amphibians', 'Birds & icons', 'Bears of the world', 'Africa', 'Asia', 'Europe', 'South & Central America', 'Australia & Oceania', 'Arctic & Antarctic', 'Ocean giants', 'Long-distance birds', 'Songbirds', 'Waterbirds & shorebirds', 'Saltwater', 'Insects & pollinators', 'Small mammals & primates', 'Public lands', 'Historical', 'Habitat', 'Conditions', 'Ocean']
+
+// Layers built by their own scripts (not GBIF/NEO) — carried through every
+// registry regeneration. Each has a scripts/build-*.mjs that writes its texture.
+const EXTRA_LAYERS = [
+  {
+    id: 'roadless', title: 'Roadless forest areas', category: 'Public lands',
+    kind: 'overlay', texture: 'textures/layer-roadless.png', opacity: 0.95,
+    caption: 'Inventoried roadless areas — 2001 Roadless Rule rescission proposed Aug 18, 2026. Orange: ~45M acres would lose protection · green: Idaho & Colorado state rules stand · USFS',
+    freshness: 'USFS · AUG 2026', source: 'USFS', featured: true,
+    cardRegion: { lngW: -170, lngE: -60, latN: 71, latS: 14 },
+  },
+]
+layers.push(...EXTRA_LAYERS.filter((x) => !ONLY.length))
 layers.sort((a, b) => (CAT_ORDER.indexOf(a.category) - CAT_ORDER.indexOf(b.category)) || a.title.localeCompare(b.title))
 if (ONLY.length) {
   console.log(`--only run: ${layers.length} layers refreshed, registry untouched, modern: ${modernIds.join(', ')}`)

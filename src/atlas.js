@@ -51,7 +51,7 @@ const STATIC_ENTRIES = {
 function composeRegistry(layers) {
   return [
     ...STATIC_ENTRIES.head,
-    ...layers.map((l) => ({ ...l, featured: l.featured ?? ['bear', 'vegetation'].includes(l.id) })),
+    ...layers.map((l) => ({ ...l, featured: l.featured ?? ['bear', 'vegetation', 'roadless'].includes(l.id) })),
     ...STATIC_ENTRIES.tail,
   ]
 }
